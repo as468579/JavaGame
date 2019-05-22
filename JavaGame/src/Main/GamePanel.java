@@ -114,7 +114,7 @@ public class GamePanel extends JPanel
 	
 	private void drawToScreen(){
 		Graphics g2 = getGraphics();
-		g.drawImage(
+		g2.drawImage(
 				image,
 				0,
 				0,

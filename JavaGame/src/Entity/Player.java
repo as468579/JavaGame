@@ -54,7 +54,7 @@ public class Player extends MapObject{
 		
 		width = 30;
 		height = 30;
-		cwidth = 20;
+		cwidth = 16;
 		cheight = 20;
 		
 		moveSpeed = 0.3;

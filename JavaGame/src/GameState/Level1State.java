@@ -32,15 +32,22 @@ public class Level1State extends GameState{
 
 	@Override
 	public void init() {
-		tileMap = new TileMap(30);
-		tileMap.loadTile("/Tilesets/grasstileset.gif");
-		tileMap.loadMap("/Maps/level1-1.map");
+
+		tileMap = new TileMap(16);
+		
+		// load tile
+		tileMap.loadTile("/Tilesets/mario_tilesets.png", 2, 2);
+		tileMap.loadTile("/Tilesets/underground_tiles.png", 1, 0);
+		
+		// load tileMap
+		tileMap.loadMap("res/Maps/Map.json");
+		
 		tileMap.setPosition(0, 0);
-		tileMap.setTween(0.07);
 		
 		bg = new Background("/Backgrounds/grassbg1.gif",0.5);
 		player = new Player(tileMap);
 		player.setPosition(100, 100);
+		tileMap.setTween(0.07);
 		
 		populateEnemies();
 		

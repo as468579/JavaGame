@@ -52,6 +52,11 @@ public class Background {
 			x = 0;
 		}
 		
+		if(y < GamePanel.HEIGHT * -1)
+		{
+			y = 0; 
+		}
+		
 		g.drawImage(
 				image, 
 				(int)x, 
@@ -81,6 +86,7 @@ public class Background {
 					null
 			);
 		}
+
 		
 		
 		

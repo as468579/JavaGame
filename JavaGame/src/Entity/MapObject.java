@@ -126,8 +126,8 @@ public abstract class MapObject {
  			if(topLeft || topRight) {
  				dy = 0;
  				
- 				// 即使下一刻就會撞上blocked tile，目前位置仍可能和blocked tile有極小差距 
- 				// 所以算出合理座標帶入
+ 				// �雿蹂���撠望���locked tile嚗���蔭隞���locked tile��扔撠榆頝� 
+ 				// ��隞亦����漣璅葆�
  				ytemp = currentRow * tileSize + cheight / 2;
  				
  			}

@@ -3,10 +3,16 @@ package TileMap;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import Main.GamePanel;
 
@@ -25,7 +31,6 @@ public class TileMap {
 	private double tween;
 	
 	// map
-	private int[][] map;
 	private int tileSize;
 	private int numRows;
 	private int numCols;
@@ -33,110 +38,196 @@ public class TileMap {
 	private int height;
 	
 	// tileset
-	private BufferedImage tileset;
-	private int numTilesAcross;
-	private Tile[][] tiles;
+	//private BufferedImage tileset;
+	private int numHorizontalTiles;
+	private int numVerticalTiles;
+	
+	private int[][] blockMap;
+	private int[][] hazardBlockMap;
+	private int[][] transparentBlockMap;
+	private int[][] functionBlockMap;
+	private int[][] backgroundItemMap;
+	private ArrayList<Tile[][]> TilesSheet;
 	
 	// drawing
 	private int rowOffset;   // tells which row to start drawing
 	private int colOffset;   // tells which column to start drawing
-	private int numRowsToDraw;  // tells how many rows to draw 
+	private int numRowsToDraw; // tells how many rows to draw 
 	private int numColsToDraw; // tells how many cols to draw
 	
+	// JSON parser
+	private ArrayList<Integer> jsonFirstIDList = new ArrayList<>();
+	
 	public TileMap(int tileSize){
-		 this.tileSize = tileSize;
-		 numRowsToDraw = ( GamePanel.HEIGHT / tileSize ) + 2; // +2?
+		this.tileSize = tileSize;
+		 numRowsToDraw = ( GamePanel.HEIGHT / tileSize ) + 2; 
 		 numColsToDraw = ( GamePanel.WIDTH / tileSize ) + 2;
-		 tween = 0.07; // test
+		 tween = 0.07; 
+		 
+		 TilesSheet = new ArrayList<Tile[][]>();
 	}
 	
-	public void loadTile(String s){
+	
+	public void loadTile(String path, int spacing, int margin){
+		
 		try{
 			
-			tileset = ImageIO.read(
-				getClass().getResourceAsStream(s)
+			BufferedImage image = ImageIO.read(
+				getClass().getResourceAsStream(path)
 			);
-			numTilesAcross = tileset.getWidth() / tileSize;
-			
-			tiles = new Tile[2][numTilesAcross];
 			
 			BufferedImage subimage;
-			for(int col = 0; col < numTilesAcross; col++){
-				subimage = tileset.getSubimage(
-							col * tileSize,
-							0,
+			numHorizontalTiles = (image.getWidth()+spacing-margin) / (tileSize + spacing);
+			numVerticalTiles = (image.getHeight()+spacing-margin) / (tileSize + spacing);
+			
+			Tile[][] tiles = new Tile[numVerticalTiles][numHorizontalTiles];
+		
+			for(int row = 0; row < numVerticalTiles; row++) {
+				for(int col = 0; col < numHorizontalTiles; col++) {
+					subimage = image.getSubimage(
+							col * tileSize + margin + spacing*col,
+							row * tileSize + margin + spacing*row,
 							tileSize,
-							tileSize
-						);
-				tiles[0][col] = new Tile(subimage, Tile.NORMAL);
-				
-				subimage = tileset.getSubimage(
-						col * tileSize,
-						tileSize,
-						tileSize,
-						tileSize
-					);
-				tiles[1][col] = new Tile(subimage, Tile.BLOCKED);
-				
+							tileSize );
+					tiles[row][col] = new Tile(subimage);
+					// all tile is blocked?
+					
+				}
 			}
+			TilesSheet.add(tiles);
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 	
-	public void loadMap(String s){
+	public void loadMap(String path){
 		
 		try {
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<
+			JSONParser parser = new JSONParser();
+			Object obj = parser.parse(new FileReader(path));
+			JSONObject jObj = (JSONObject) obj;
 			
-			InputStream in = getClass().getResourceAsStream(s);
-			BufferedReader br = new BufferedReader(
-						new InputStreamReader(in)
-					);
+			JSONArray layers = (JSONArray) jObj.get("layers"); //get json file's data that name is 'layers'
+			JSONArray jTilesets = (JSONArray) jObj.get("tilesets");
+			for(Object iObj : jTilesets) {
+				jsonFirstIDList.add((int)(long)((JSONObject) iObj).get("firstgid"));
+			}
+			int amount = layers.size();
 			
-			numCols = Integer.parseInt(br.readLine());
-			numRows = Integer.parseInt(br.readLine());
-			map = new int[numRows][numCols];
+			// parsing all 'layers'
+			for(int i = 0; i < amount; i++) {
+				JSONObject layer = (JSONObject) layers.get(i);
+				String type = (String) layer.get("name");
+				numCols = (int) (long) layer.get("width");
+				numRows = (int) (long) layer.get("height");
+				
+				
+				// parsing 'data' in each 'layers'
+				if (type.equals("background_items")){
+					System.out.println("parsing: background_item...");
+					backgroundItemMap = parse((JSONArray) layer.get("data"));
+				}
+				else if (type.equals("hazard_blocks")){
+					System.out.println("parsing: hazard_blocks...");
+					hazardBlockMap = parse((JSONArray)layer.get("data"));
+					
+				}
+				else if(type.equals("blocks")) {
+					System.out.println("parsing: blocks...");
+					blockMap = parse((JSONArray) layer.get("data"));
+				}
+				else if(type.equals("function_blocks")) {
+					System.out.println("parsing: function_blocks...");
+					functionBlockMap = parse((JSONArray) layer.get("data"));
+				}
+				else if(type.contentEquals("opacity_blocks")) {
+					System.out.println("parsing: opacity_blocks...");
+					transparentBlockMap = parse((JSONArray) layer.get("data"));
+				}
+			}
 			width = numCols * tileSize;
 			height = numRows * tileSize;
-			
 			xmin = GamePanel.WIDTH - width;
 			xmax = 0;
 			ymin = GamePanel.HEIGHT - height;
-			ymin = 0;
-			
-			String delims = "\\s+";
-			for(int row = 0; row < numRows ; row++) {
-				String line = br.readLine();
-				String[] tokens = line.split(delims);
-			
-				for(int col = 0; col < numCols ; col++) {
-					map[row][col] = Integer.parseInt(tokens[col]);
-				}
-			}
-			
+			ymax = 0;
+
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 		
 	}
 	
+	
+	private int[][] parse(JSONArray arr){
+		int [][] layer = new int[numRows][numCols];
+		int data;
+		int firstgid = 0; // firstgid to recognize which type is this index belongs to
+		Tile[][] tileset = null;
+		try {
+			for(int row = 0; row < numRows; row++){
+				for(int col = 0; col < numCols; col++){
+					data = (int)(long)arr.get((row * numCols) + col);
+					
+					/* check index value to judge which sprite should use */
+//					if(dataIndex < jsonFirstIDList.get(0)){
+//						continue;
+//					}
+//					else if(dataIndex < jsonFirstIDList.get(1)) {	// tilesets[0]
+//						firstgid = jsonFirstIDList.get(0);
+//					}
+//					else if(dataIndex < jsonFirstIDList.get(2)) {	// tilesets[1]
+//						firstgid = jsonFirstIDList.get(1);
+//					}
+//					else if(dataIndex < jsonFirstIDList.get(3)) {	// tilesets[2]
+//						tileset = TilesSheet.get(0);
+//						firstgid = jsonFirstIDList.get(2);
+//					}
+//					else if(dataIndex < jsonFirstIDList.get(4)) {	// tilesets[3]
+//						tileset = TilesSheet.get(1);
+//						firstgid = jsonFirstIDList.get(3);
+//					}
+//					else {										// tilesets[4]
+//						firstgid = jsonFirstIDList.get(4);
+//					}
+					
+					//layer[row][col] = getTile(tileset, dataIndex, firstgid);
+					layer[row][col] = data;
+				}
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return layer;
+	}
+	
+	
+	
 	public int getTileSize() { return tileSize; }
-	public double getX() { return x; }
-	public double getY() { return y; }
+	public int getX() { return (int)x; }
+	public int getY() { return (int)y; }
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	
+	
+	
 	public int getType(int row, int col) {
-		int rc = map[row][col];
-		int r = rc / numTilesAcross;
-		int c = rc % numTilesAcross;
-		return tiles[r][c].getType();
+		
+		// int rc = map[row][col];
+		// int r = rc / numHorizontalTiles;
+		// int c = rc % numHorizontalTiles;
+		// return tiles[r][c].getType();
+		
+		if(blockMapExist(row, col))
+			return Tile.BLOCKED;
+		else return Tile.NORMAL;
 	}
 	
 	public void setPosition(double x, double y){
 
-		// test * tween
+		
 		this.x += (x - this.x) * tween;
 		this.y += (y - this.y) * tween;
 		//this.x = x;
@@ -146,6 +237,7 @@ public class TileMap {
 		
 		colOffset = (int)-this.x / tileSize;
 		rowOffset = (int)-this.y / tileSize;
+		
 	}
 	
 	private void fixBounds() {
@@ -155,12 +247,13 @@ public class TileMap {
 		if(y > ymax) y = ymax;
 	}
 	
+	
 	public void setTween(double tween) {
 		this.tween = tween;
 	}
 	
+	
 	public void draw(Graphics2D g) {
-		
 		for(
 			int row = rowOffset;
 			row < rowOffset + numRowsToDraw;
@@ -174,39 +267,145 @@ public class TileMap {
 				col++) {
 				
 				if(col > numCols) break;
-				if(map[row][col] == 0) continue;
 				
-				int rc = map[row][col];
-				int r = rc / numTilesAcross;
-				int c = rc % numTilesAcross;
+				drawBackgroundItems(row, col, g);
+				drawBlocks(row, col, g);
+				drawFunctionBlocks(row, col, g);
+				drawHazardBlocks(row, col, g);
+				drawTransparentBlocks(row, col, g);
 				
-				g.drawImage(
-						tiles[r][c].getImage(),
-						(int) x + col * tileSize,
-						(int) y + row * tileSize,
-						null
-				);
 			}
 				
 		}
 	}
 	
-	public void testDraw(Graphics2D g) {
-		
-		// after calling this func, the screen should 
-		//       as same as the grasstileset.gif
-		
-		for(int i = 0; i < 2 ; i++) {
-			for(int j = 0; j < numTilesAcross; j++) {
-				g.drawImage(
-						tiles[i][j].getImage(),
-						(int) x + j * tileSize,
-						(int) y + i * tileSize,
-						null
-				);
-			}
+	
+	
+	public void drawBackgroundItems(int row, int col, Graphics2D g) {
+		if(backgroundItemMapExist(row, col)) {
+			g.drawImage(
+					getTile(backgroundItemMap, row, col).getImage(),
+					(int) x + col * tileSize,
+					(int) y + row * tileSize,
+					null
+			);
 		}
 	}
+	
+	public void drawBlocks(int row, int col, Graphics2D g) {
+		if(blockMapExist(row, col)) {
+			
+			Tile subT = getTile(blockMap, row, col);
+			
+			
+			int horizontal = TilesSheet.get(0).length;
+			int tRow = ((blockMap[row][col] - jsonFirstIDList.get(2)) / horizontal);
+			int tCol = ((blockMap[row][col] - jsonFirstIDList.get(2)) % horizontal);
+			
+			g.drawImage(
+					subT.getImage(),
+					(int) x + col * tileSize,
+					(int) y + row * tileSize,
+					null
+			);
+		}
+	}
+	
+	public void drawFunctionBlocks(int row, int col, Graphics2D g) {
+		if(functionBlockMapExist(row, col)) {
+			g.drawImage(
+					getTile(functionBlockMap, row, col).getImage(),
+					(int) x + col * tileSize,
+					(int) y + row * tileSize,
+					null
+			);
+		}
+	}
+	
+	public void drawHazardBlocks(int row, int col, Graphics2D g) {
+		if(hazardBlockMapExist(row, col)) {
+			g.drawImage(
+					getTile(hazardBlockMap, row, col).getImage(),
+					(int) x + col * tileSize,
+					(int) y + row * tileSize,
+					null
+			);
+		}
+	}
+	
+	public void drawTransparentBlocks(int row, int col, Graphics2D g) {
+		if(transparentBlockMapExist(row, col)) {
+			g.drawImage(
+					getTile(transparentBlockMap, row, col).getImage(),
+					(int) x + col * tileSize,
+					(int) y + row * tileSize,
+					null
+			);
+		}
+	}
+	
+	
+	public Tile getTile(int[][] map, int row, int col) {
+		int firstgid=0;
+		Tile[][] tileset = null;
+		Tile[][] objTile = new Tile[numRows][numCols];
+				/* check index value to judge which sprite should use */
+		if(map[row][col] < jsonFirstIDList.get(0)){ // 0 -> didn't draw
+			return null;
+		}
+		else if(map[row][col] < jsonFirstIDList.get(1)) {	// tilesets[0]
+			firstgid = jsonFirstIDList.get(0);
+		}
+		else if(map[row][col] < jsonFirstIDList.get(2)) {	// tilesets[1]
+			firstgid = jsonFirstIDList.get(1);
+		}
+		else if(map[row][col] < jsonFirstIDList.get(3)) {	// tilesets[2]
+			tileset = TilesSheet.get(0);
+			firstgid = jsonFirstIDList.get(2);
+		}
+		else if(map[row][col] < jsonFirstIDList.get(4)) {	// tilesets[3]
+			tileset = TilesSheet.get(1);
+			firstgid = jsonFirstIDList.get(3);
+		}
+		else {										// tilesets[4]
+			firstgid = jsonFirstIDList.get(4);
+		}
+		
+		int horizontal = tileset[0].length;
+		int tRow = ((map[row][col] - firstgid) / horizontal);
+		int tCol = ((map[row][col] - firstgid) % horizontal);
+		
+		objTile[row][col] = tileset[tRow][tCol];
+		
+		return tileset[tRow][tCol];
+	}
+	
+	
+	
+	
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// check position is in bound
+		/*public boolean inBound(int row, int col) {
+			return (row >= 0 && row < (numRows) && col >= 0 && col < (numCols));
+		}*/
+		
+		/* check all object is exist */
+		public boolean blockMapExist(int row, int col) {
+			return (blockMap[row][col] > 0);
+		}
+		
+		public boolean backgroundItemMapExist(int row, int col) {
+			return (backgroundItemMap[row][col] > 0);
+		}
+		public boolean hazardBlockMapExist(int row, int col) {
+			return (hazardBlockMap[row][col] > 0);
+		}
+		public boolean transparentBlockMapExist(int row, int col) {
+			return (transparentBlockMap[row][col] > 0);
+		}
+		public boolean functionBlockMapExist(int row, int col) {
+			return (functionBlockMap[row][col] > 0);
+		}
 }
 
 
