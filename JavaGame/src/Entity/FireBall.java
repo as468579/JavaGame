@@ -21,6 +21,8 @@ public class FireBall extends MapObject{
 		if(right) dx = moveSpeed;
 		else dx = -moveSpeed;
 		
+		facingRight = right;
+		
 		width = 30;
 		height = 30;
 		cwidth = 14;
@@ -88,30 +90,14 @@ public class FireBall extends MapObject{
 		}
 	}
 	
+	@Override
 	public void draw(Graphics2D g) {
 		
 		setMapPosition();
 		
-		// 因為火球是對稱的所以並不需要設定facingRight = true or false , no influence
-		if(facingRight) { 
-			System.out.println("FireBall facingRight");
-			g.drawImage(
-				animation.getImage(),
-				(int)(x + xmap - width / 2),  // let x be the center of image
-				(int)(y + ymap - height / 2), // let y be the center of image
-				null
-			);
-		}
-		else{
-			g.drawImage(
-				animation.getImage(),
-				(int)(x + xmap - width / 2 + width), // let x be the center of image
-				(int)(y + ymap - height /2),         // let y be the center of image
-				-width,
-				height,
-				null
-			);
-			
-		}
+		super.draw(g);
 	}
+
+	@Override
+	protected void getNextPosition() {}
 }

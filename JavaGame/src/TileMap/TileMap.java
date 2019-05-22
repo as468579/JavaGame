@@ -122,8 +122,8 @@ public class TileMap {
 	}
 	
 	public int getTileSize() { return tileSize; }
-	public int getX() { return (int)x; }
-	public int getY() { return (int)y; }
+	public double getX() { return x; }
+	public double getY() { return y; }
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	
@@ -137,10 +137,10 @@ public class TileMap {
 	public void setPosition(double x, double y){
 
 		// test * tween
-		//this.x += (x - this.x) * tween;
-		//this.y += (y - this.y) * tween;
-		this.x = x;
-		this.y = y;
+		this.x += (x - this.x) * tween;
+		this.y += (y - this.y) * tween;
+		//this.x = x;
+		//this.y = y;
 
 		fixBounds();
 		
@@ -153,6 +153,10 @@ public class TileMap {
 		if(y < ymin) y = ymin;
 		if(x > xmax) x = xmax;
 		if(y > ymax) y = ymax;
+	}
+	
+	public void setTween(double tween) {
+		this.tween = tween;
 	}
 	
 	public void draw(Graphics2D g) {

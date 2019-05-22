@@ -2,6 +2,9 @@ package Entity;
 
 import TileMap.Tile;
 import TileMap.TileMap;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 import Main.GamePanel;
@@ -23,6 +26,8 @@ public abstract class MapObject {
 	// dimension
 	protected int width;  // for reading in the sprite sheets 
 	protected int height; // for reading in the sprite sheets
+	
+	// 
 	
 	// collision box
 	protected int cwidth; // for detect collision
@@ -77,7 +82,6 @@ public abstract class MapObject {
  	
  	public Rectangle getRectangle() {
  		
- 		// test
  		return new Rectangle(
  				(int)x - cwidth,
  				(int)y - cheight,
@@ -122,7 +126,8 @@ public abstract class MapObject {
  			if(topLeft || topRight) {
  				dy = 0;
  				
- 				// p要設定的原因是 即使下一刻就撞到blocked Tile不代表已經碰到block頂端可能還有極小差距
+ 				// 即使下一刻就會撞上blocked tile，目前位置仍可能和blocked tile有極小差距 
+ 				// 所以算出合理座標帶入
  				ytemp = currentRow * tileSize + cheight / 2;
  				
  			}
@@ -198,11 +203,54 @@ public abstract class MapObject {
  	public void setRight(boolean b) {  right = b;}
  	public void setJumping(boolean b) { jumping = b; }
  	
- 	public boolean notOnScreean() {
+ 	public boolean notOnScreen() {
  		return x + xmap + width < 0 || 
  			x + xmap - width > GamePanel.WIDTH ||
  			y + ymap + height < 0 ||
  			y + ymap - height > GamePanel.HEIGHT;
  	}
  	
+ 	public void draw(Graphics2D g) {
+		if(facingRight) {
+			g.drawImage(
+				animation.getImage(),
+				(int)(x + xmap - width / 2),  // let x be the center of image
+				(int)(y + ymap - height / 2), // let y be the center of image
+				null
+			);
+		}
+		else{
+			g.drawImage(
+				animation.getImage(),
+				(int)(x + xmap - width / 2 + width), // let x be the center of image
+				(int)(y + ymap - height /2),         // let y be the center of image
+				-width,
+				height,
+				null
+			);
+			
+		}
+		
+		// draw for test
+		drawCollisionBox(g);
+ 	}
+ 	
+ 	protected abstract void getNextPosition();
+ 	
+ 	public void update() {
+ 		
+		// update position
+		getNextPosition();
+		checkTileMapCollision();
+		setPosition(xtemp,ytemp);
+ 	}
+ 	
+	public void drawCollisionBox(Graphics2D g) {
+		g.setColor(Color.BLUE);
+		Rectangle r = getRectangle();
+		r.x += ( xmap + cwidth );
+		r.y += ( ymap + cheight );
+		g.draw(r);
+	}
+	
 }

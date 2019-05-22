@@ -132,7 +132,66 @@ public class Player extends MapObject{
 	
 	public void setGliding(boolean b) { gliding = b; }
 	
-	private void getNextPosition() {
+	public void checkAttack(ArrayList<Enemy> enemies) {
+		
+		// loop through enemies
+		for(int i = 0; i < enemies.size(); i++) {
+			
+			Enemy e = enemies.get(i);
+			
+			// while scratching, player's attack range is out of player's width
+			// So we can not use intersects method 
+			// scratch attack
+			if(scratching) {
+				if(facingRight) {
+					if( 
+						e.getX() > x &&
+						e.getX() < x + scratchRange &&
+						e.getY() > y - height / 2   &&
+						e.getY() < y +  height / 2
+					){
+						e.hit(scratchDamage);
+					}
+				}
+				else {
+					if(
+						e.getX() < x &&
+						e.getX() > x - scratchRange &&
+						e.getY() > y - height / 2   &&
+						e.getY() < y + height / 2 
+					) {
+						e.hit(scratchDamage);
+					}
+				}
+			}
+			
+			// fireball attack
+			for(int j = 0; j < fireBalls.size(); j++) {
+				if(fireBalls.get(j).intersects(e)) {
+					e.hit(fireBallDamage);
+					fireBalls.get(j).setHit();
+					break; // cuz enemy dies after be hit
+				}
+			}
+			
+			// chcek enemy collision
+			if(intersects(e)) {
+				hit(e.getDamage());
+			}
+		}
+		
+	}
+	
+	public void hit(int damage) {
+		if(flinching) return ;
+		health -= damage;
+		if(health < 0) health = 0;
+		if(health == 0) dead = true;
+		flinching = true;
+		flinchTimer = System.nanoTime();
+	}
+	
+	protected void getNextPosition() {
 		
 		// movement
 		if(left) {
@@ -193,9 +252,7 @@ public class Player extends MapObject{
 	public void update() {
 		
 		// update position
-		getNextPosition();
-		checkTileMapCollision();
-		setPosition(xtemp,ytemp);
+		super.update();
 		
 		// check attack has stopped
 		if(currentAction == SCRATCHING) {
@@ -224,6 +281,14 @@ public class Player extends MapObject{
 			if(fireBalls.get(i).shouldRemove()) {
 				fireBalls.remove(i);
 				i--;
+			}
+		}
+		
+		// check done flinching
+		if(flinching) {
+			long elapsed = (System.nanoTime() - flinchTimer) / 1000000;
+			if(elapsed > 1000) {
+				flinching = false;
 			}
 		}
 		
@@ -295,9 +360,11 @@ public class Player extends MapObject{
 		}
 	}
 	
+	@Override
 	public void draw(Graphics2D g) {
 		
-		// xmap and ymap should be equal to tileMap.x and tileMap.y
+		// let player.xmap = tileMap.x and player.ymap = tileMap.y
+		// update the map information saved in player
 		setMapPosition(); 
 		
 		//draw fireballs
@@ -305,7 +372,7 @@ public class Player extends MapObject{
 			fireBalls.get(i).draw(g);
 		}
 		
-		// draw player
+		// draw flinching player
 		if(flinching) {
 			long elapsed = (System.nanoTime() - flinchTimer) / 1000000;
 			if(elapsed / 100 % 2 == 0) {
@@ -313,29 +380,8 @@ public class Player extends MapObject{
 			}
 		}
 		
-		if(facingRight) {
-			g.drawImage(
-				animation.getImage(),
-				(int)(x + xmap - width / 2),  // let x be the center of image
-				(int)(y + ymap - height / 2), // let y be the center of image
-				null
-			);
-		}
-		else{
-			g.drawImage(
-				animation.getImage(),
-				(int)(x + xmap - width / 2 + width), // let x be the center of image
-				(int)(y + ymap - height /2),         // let y be the center of image
-				-width,
-				height,
-				null
-			);
-			
-		}
-		g.setColor(Color.BLUE);
-		Rectangle r = getRectangle();
-		r.x += ( xmap + cwidth );
-		r.y += ( ymap + cheight );
-		g.draw(r);
+		super.draw(g);
+		
 	}
+	
 }
