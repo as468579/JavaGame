@@ -68,6 +68,12 @@ public abstract class MapObject {
  	protected double jumpStart;
  	protected double stopJumpSpeed;
  	
+ 	// four corners
+ 	private boolean topCollided;
+ 	private boolean bottomCollided;
+ 	private boolean leftCollided;
+ 	private boolean rightCollided;
+ 	
  	// constructor
  	public MapObject(TileMap tm) {
  		tileMap = tm;
@@ -90,23 +96,43 @@ public abstract class MapObject {
  		);
  	}
  	
- 	public void calculateCorners(double x, double y) {
+ 	public void calculateEdges(double x, double y) {
  		
  		int leftTile = (int)(x - cwidth / 2) / tileSize;
  		int rightTile = (int)(x + cwidth / 2 - 1) / tileSize;
  		int topTile = (int)(y - cheight / 2) / tileSize;
  		int bottomTile = (int)(y + cheight / 2 - 1) / tileSize;
  		
- 		int tl = tileMap.getType(topTile, leftTile); // the tile behind topLeft corner getType
- 		int tr = tileMap.getType(topTile, rightTile); // the tile behind topRight corner getTyp
- 		int bl = tileMap.getType(bottomTile, leftTile); // the tile behind bottomLeft corner getType
- 		int br = tileMap.getType(bottomTile, rightTile); // the tile behind bottomRight corner getType
+ 		// initialize
+ 		topCollided = false;
+ 		bottomCollided = false;
+ 		leftCollided = false;
+ 		rightCollided = false;
+ 		for(int i = leftTile; i <= rightTile; i++) {
+ 			
+ 	 		// check top edge
+ 			if (tileMap.getType(topTile, i) == Tile.BLOCKED)  {
+ 				topCollided = true;
+ 			}
+ 			
+ 			// check bottom edge
+ 			if(tileMap.getType(bottomTile, i) == Tile.BLOCKED) {
+ 				bottomCollided = true;
+ 			}
+ 		}
  		
- 		topLeft = (tl == Tile.BLOCKED);
- 		topRight = (tr == Tile.BLOCKED);
- 		bottomLeft = (bl == Tile.BLOCKED);
- 		bottomRight = (br == Tile.BLOCKED);
- 		
+ 		for(int i = topTile; i <= bottomTile; i++) {
+ 			
+ 	 		// check left edge
+ 			if (tileMap.getType(i, leftTile) == Tile.BLOCKED)  {
+ 				leftCollided = true;
+ 			}
+ 			
+ 			// check right edge
+ 			if(tileMap.getType(i, rightTile) == Tile.BLOCKED) {
+ 				rightCollided = true;
+ 			}
+ 		}		
  	}
  	
  	public void checkTileMapCollision() {
@@ -120,14 +146,14 @@ public abstract class MapObject {
  		xtemp = x;
  		ytemp = y;
  		
- 		calculateCorners(x,ydest);
+ 		calculateEdges(x,ydest);
  		
  		if(dy < 0) {
- 			if(topLeft || topRight) {
+ 			if(topCollided) {
  				dy = 0;
  				
- 				// �雿蹂���撠望���locked tile嚗���蔭隞���locked tile��扔撠榆頝� 
- 				// ��隞亦����漣璅葆�
+ 				// 即使下一刻就會撞上blocked tile，目前位置仍可能和blocked tile有極小差距 
+ 				// 所以算出合理座標帶入
  				ytemp = currentRow * tileSize + cheight / 2;
  				
  			}
@@ -137,9 +163,10 @@ public abstract class MapObject {
  			
  		}
  		if(dy > 0) {
- 			if(bottomLeft || bottomRight) {
+ 			if(bottomCollided) {
  				dy = 0;
  				falling = false;
+ 			    // if cheight /2 > tileSize , the MapObject will bounce 
  				ytemp = (currentRow + 1) * tileSize - cheight / 2;
  			}
  			else {
@@ -147,9 +174,9 @@ public abstract class MapObject {
  			}
  		}
  		
- 		calculateCorners(xdest,y);
+ 		calculateEdges(xdest,y);
  		if(dx < 0) {
- 			if(topLeft || bottomLeft) {
+ 			if(leftCollided) {
  				dx = 0;
  				xtemp = currentCol * tileSize + cwidth / 2;
  			}
@@ -158,7 +185,7 @@ public abstract class MapObject {
  			}
  		}
  		if(dx > 0) {
- 			if(topRight || bottomRight) {
+ 			if(rightCollided) {
  				dx = 0;
  				xtemp = (currentCol + 1) * tileSize - cwidth / 2;
  			}
@@ -168,8 +195,8 @@ public abstract class MapObject {
  		}
  		
  		if(!falling) {
- 			calculateCorners(x, ydest + 1);
- 			if(!bottomLeft && !bottomRight) {
+ 			calculateEdges(x, ydest + 1);
+ 			if(!bottomCollided) {
  				falling = true;
  			}
  		}
@@ -248,8 +275,8 @@ public abstract class MapObject {
 	public void drawCollisionBox(Graphics2D g) {
 		g.setColor(Color.BLUE);
 		Rectangle r = getRectangle();
-		r.x += ( xmap + cwidth );
-		r.y += ( ymap + cheight );
+		r.x += ( xmap + cwidth / 2 );
+		r.y += ( ymap + cheight / 2 );
 		g.draw(r);
 	}
 	

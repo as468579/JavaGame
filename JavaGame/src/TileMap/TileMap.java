@@ -69,7 +69,6 @@ public class TileMap {
 	
 	
 	public void loadTile(String path, int spacing, int margin){
-		
 		try{
 			
 			BufferedImage image = ImageIO.read(
@@ -90,8 +89,6 @@ public class TileMap {
 							tileSize,
 							tileSize );
 					tiles[row][col] = new Tile(subimage);
-					// all tile is blocked?
-					
 				}
 			}
 			TilesSheet.add(tiles);
@@ -102,7 +99,6 @@ public class TileMap {
 	}
 	
 	public void loadMap(String path){
-		
 		try {
 			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<
 			JSONParser parser = new JSONParser();
@@ -122,7 +118,6 @@ public class TileMap {
 				String type = (String) layer.get("name");
 				numCols = (int) (long) layer.get("width");
 				numRows = (int) (long) layer.get("height");
-				
 				
 				// parsing 'data' in each 'layers'
 				if (type.equals("background_items")){
@@ -281,7 +276,7 @@ public class TileMap {
 	
 	
 	
-	public void drawBackgroundItems(int row, int col, Graphics2D g) {
+	private void drawBackgroundItems(int row, int col, Graphics2D g) {
 		if(backgroundItemMapExist(row, col)) {
 			g.drawImage(
 					getTile(backgroundItemMap, row, col).getImage(),
@@ -292,7 +287,7 @@ public class TileMap {
 		}
 	}
 	
-	public void drawBlocks(int row, int col, Graphics2D g) {
+	private void drawBlocks(int row, int col, Graphics2D g) {
 		if(blockMapExist(row, col)) {
 			
 			Tile subT = getTile(blockMap, row, col);
@@ -311,7 +306,7 @@ public class TileMap {
 		}
 	}
 	
-	public void drawFunctionBlocks(int row, int col, Graphics2D g) {
+	private void drawFunctionBlocks(int row, int col, Graphics2D g) {
 		if(functionBlockMapExist(row, col)) {
 			g.drawImage(
 					getTile(functionBlockMap, row, col).getImage(),
@@ -322,7 +317,7 @@ public class TileMap {
 		}
 	}
 	
-	public void drawHazardBlocks(int row, int col, Graphics2D g) {
+	private void drawHazardBlocks(int row, int col, Graphics2D g) {
 		if(hazardBlockMapExist(row, col)) {
 			g.drawImage(
 					getTile(hazardBlockMap, row, col).getImage(),
@@ -333,7 +328,7 @@ public class TileMap {
 		}
 	}
 	
-	public void drawTransparentBlocks(int row, int col, Graphics2D g) {
+	private void drawTransparentBlocks(int row, int col, Graphics2D g) {
 		if(transparentBlockMapExist(row, col)) {
 			g.drawImage(
 					getTile(transparentBlockMap, row, col).getImage(),
@@ -349,7 +344,8 @@ public class TileMap {
 		int firstgid=0;
 		Tile[][] tileset = null;
 		Tile[][] objTile = new Tile[numRows][numCols];
-				/* check index value to judge which sprite should use */
+		
+		/* check index value to judge which sprite should use */
 		if(map[row][col] < jsonFirstIDList.get(0)){ // 0 -> didn't draw
 			return null;
 		}
@@ -380,45 +376,22 @@ public class TileMap {
 		return tileset[tRow][tCol];
 	}
 	
-	
-	
-	
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// check position is in bound
-		/*public boolean inBound(int row, int col) {
-			return (row >= 0 && row < (numRows) && col >= 0 && col < (numCols));
-		}*/
 		
-		/* check all object is exist */
-		public boolean blockMapExist(int row, int col) {
-			return (blockMap[row][col] > 0);
-		}
-		
-		public boolean backgroundItemMapExist(int row, int col) {
-			return (backgroundItemMap[row][col] > 0);
-		}
-		public boolean hazardBlockMapExist(int row, int col) {
-			return (hazardBlockMap[row][col] > 0);
-		}
-		public boolean transparentBlockMapExist(int row, int col) {
-			return (transparentBlockMap[row][col] > 0);
-		}
-		public boolean functionBlockMapExist(int row, int col) {
-			return (functionBlockMap[row][col] > 0);
-		}
+	/* check all object is exist */
+	private boolean blockMapExist(int row, int col) {
+		return (blockMap[row][col] > 0);
+	}
+	
+	private boolean backgroundItemMapExist(int row, int col) {
+		return (backgroundItemMap[row][col] > 0);
+	}
+	private boolean hazardBlockMapExist(int row, int col) {
+		return (hazardBlockMap[row][col] > 0);
+	}
+	private boolean transparentBlockMapExist(int row, int col) {
+		return (transparentBlockMap[row][col] > 0);
+	}
+	private boolean functionBlockMapExist(int row, int col) {
+		return (functionBlockMap[row][col] > 0);
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

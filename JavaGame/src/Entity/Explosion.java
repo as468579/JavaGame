@@ -24,8 +24,8 @@ public class Explosion {
 		this.x = x;
 		this.y = y;
 		
-		width = 30;
-		height = 30;
+		width = 60;
+		height = 60;
 		
 		try {
 			BufferedImage spritesheet = ImageIO.read(

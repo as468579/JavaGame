@@ -7,12 +7,14 @@ import Entity.Enemy;
 import Entity.Explosion;
 import Entity.HUD;
 import Entity.Player;
+import Entity.Enemies.Alligator;
 import Entity.Enemies.Slugger;
+import Entity.Enemies.Snake;
 import Main.GamePanel;
 import TileMap.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-
+import Audio.AudioPlayer;
 public class Level1State extends GameState{
 	
 	private TileMap tileMap;
@@ -24,6 +26,8 @@ public class Level1State extends GameState{
 	private ArrayList<Explosion> explosions;
 	
 	private HUD hud;
+	private AudioPlayer bgMusic;
+
 	
 	public Level1State(GameStateManager gsm){
 		this.gsm = gsm;
@@ -32,7 +36,6 @@ public class Level1State extends GameState{
 
 	@Override
 	public void init() {
-
 		tileMap = new TileMap(16);
 		
 		// load tile
@@ -43,17 +46,20 @@ public class Level1State extends GameState{
 		tileMap.loadMap("res/Maps/Map.json");
 		
 		tileMap.setPosition(0, 0);
+		tileMap.setTween(0.07);
 		
 		bg = new Background("/Backgrounds/grassbg1.gif",0.5);
 		player = new Player(tileMap);
 		player.setPosition(100, 100);
-		tileMap.setTween(0.07);
 		
 		populateEnemies();
 		
 		explosions = new ArrayList<Explosion>();
 		
 		hud = new HUD(player);
+		
+		bgMusic = new AudioPlayer("/Music/level1-1.mp3");
+		bgMusic.play();
 	}
 
 	private void populateEnemies() {
@@ -61,19 +67,22 @@ public class Level1State extends GameState{
 		// populate enemy
 		enemies = new ArrayList<Enemy>();
 		
-		Slugger s;
+		Slugger sl;
+		Alligator a;
+		Snake sn;
 		Point[] points = new Point[] {
 			new Point(200, 200),
-			new Point(860, 200),
-			new Point(1525, 200),
-			new Point(1680, 200),
-			new Point(1800, 200)
 		};
 		
 		for(int i = 0; i < points.length; i++) {
-			s = new Slugger(tileMap);
-			s.setPosition(points[i].x, points[i].y);
-			enemies.add(s);
+			a = new Alligator(tileMap);
+			a.setPosition(points[i].x, points[i].y);
+			enemies.add(a);
+		}
+		for(int i = 0; i < points.length; i++) {
+			sn = new Snake(tileMap);
+			sn.setPosition(points[i].x, points[i].y);
+			enemies.add(sn);
 		}
 	}
 	@Override

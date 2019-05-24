@@ -1,8 +1,11 @@
 package Entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import javax.imageio.ImageIO;
 
+import Audio.AudioPlayer;
 import TileMap.TileMap;
 
 import java.awt.*;
@@ -48,13 +51,14 @@ public class Player extends MapObject{
 	private static final int FIREBALL = 5;
 	private static final int SCRATCHING = 6;
 	
+	private HashMap<String, AudioPlayer> sfx;
 	public Player(TileMap tm) {
 		
 		super(tm);
 		
 		width = 30;
 		height = 30;
-		cwidth = 16;
+		cwidth = 20;
 		cheight = 20;
 		
 		moveSpeed = 0.3;
@@ -119,6 +123,9 @@ public class Player extends MapObject{
 		currentAction = IDLE;
 		animation.setFrames(sprites.get(IDLE));
 		animation.setDelay(400);
+		sfx = new HashMap<String, AudioPlayer>();
+		sfx.put("jump",new AudioPlayer("/SFX/jump.mp3"));
+		sfx.put("scratch", new AudioPlayer("/SFX/scratch.mp3"));
 	}
 	
 	public int getHealth() { return health; }
@@ -230,6 +237,7 @@ public class Player extends MapObject{
 		
 		// jumping
 		if(jumping && !falling) {
+			sfx.get("jump").play();
 			dy  = jumpStart;
 			falling = true;
 		}
@@ -253,7 +261,6 @@ public class Player extends MapObject{
 		
 		// update position
 		super.update();
-		
 		// check attack has stopped
 		if(currentAction == SCRATCHING) {
 			if(animation.hasPlayedOnce()) scratching = false;
@@ -294,6 +301,7 @@ public class Player extends MapObject{
 		
 		// set animation 
 		if(scratching) {
+			sfx.get("scratch").play();
 			if(currentAction != SCRATCHING) {
 				currentAction = SCRATCHING;
 				animation.setFrames(sprites.get(SCRATCHING));
@@ -379,9 +387,7 @@ public class Player extends MapObject{
 				return ;
 			}
 		}
-		
 		super.draw(g);
-		
 	}
 	
 }
