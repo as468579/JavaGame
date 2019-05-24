@@ -262,16 +262,6 @@ public abstract class MapObject {
 		drawCollisionBox(g);
  	}
  	
- 	protected abstract void getNextPosition();
- 	
- 	public void update() {
- 		
-		// update position
-		getNextPosition();
-		checkTileMapCollision();
-		setPosition(xtemp,ytemp);
- 	}
- 	
 	public void drawCollisionBox(Graphics2D g) {
 		g.setColor(Color.BLUE);
 		Rectangle r = getRectangle();

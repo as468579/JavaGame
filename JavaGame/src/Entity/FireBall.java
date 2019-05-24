@@ -98,6 +98,4 @@ public class FireBall extends MapObject{
 		super.draw(g);
 	}
 
-	@Override
-	protected void getNextPosition() {}
 }

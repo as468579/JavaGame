@@ -65,8 +65,7 @@ public class Snake extends Enemy{
 		
 	}
 	
-	@Override
-	protected void getNextPosition() {
+	private void getNextPosition() {
 		
 		// cuz a alligator only move left or right
 		// movement
@@ -93,7 +92,9 @@ public class Snake extends Enemy{
 	public void update() {
 		
 		// update position
-		super.update();
+		getNextPosition();
+		checkTileMapCollision();
+		setPosition(xtemp,ytemp);
 		
 		
 		// check flinching

@@ -64,8 +64,7 @@ public class Alligator extends Enemy{
 		
 	}
 	
-	@Override
-	protected void getNextPosition() {
+	private void getNextPosition() {
 		
 		// cuz a alligator only move left or right
 		// movement

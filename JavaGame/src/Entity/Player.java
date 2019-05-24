@@ -198,7 +198,7 @@ public class Player extends MapObject{
 		flinchTimer = System.nanoTime();
 	}
 	
-	protected void getNextPosition() {
+	private void getNextPosition() {
 		
 		// movement
 		if(left) {
@@ -260,7 +260,11 @@ public class Player extends MapObject{
 	public void update() {
 		
 		// update position
-		super.update();
+		getNextPosition();
+		checkTileMapCollision();
+		setPosition(xtemp,ytemp);
+		
+		
 		// check attack has stopped
 		if(currentAction == SCRATCHING) {
 			if(animation.hasPlayedOnce()) scratching = false;

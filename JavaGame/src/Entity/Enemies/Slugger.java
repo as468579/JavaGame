@@ -66,8 +66,7 @@ public class Slugger extends Enemy{
 		
 	}
 	
-	@Override
-	protected void getNextPosition() {
+	private void getNextPosition() {
 		
 		// cuz a slugger only move left or right
 		// movement
