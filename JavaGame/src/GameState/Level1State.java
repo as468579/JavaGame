@@ -6,10 +6,13 @@ import java.awt.Point;
 import Entity.Enemy;
 import Entity.Explosion;
 import Entity.HUD;
+import Entity.Item;
 import Entity.Player;
 import Entity.Enemies.Alligator;
 import Entity.Enemies.Slugger;
 import Entity.Enemies.Snake;
+import Entity.Items.Bomb;
+import Entity.Items.Treasurebox;
 import Main.GamePanel;
 import TileMap.*;
 import java.awt.event.KeyEvent;
@@ -24,6 +27,7 @@ public class Level1State extends GameState{
 	
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Explosion> explosions;
+	private ArrayList<Item> items;
 	
 	private HUD hud;
 	private AudioPlayer bgMusic;
@@ -53,6 +57,7 @@ public class Level1State extends GameState{
 		player.setPosition(100, 100);
 		
 		populateEnemies();
+		populateItems();
 		
 		explosions = new ArrayList<Explosion>();
 		
@@ -85,6 +90,24 @@ public class Level1State extends GameState{
 			enemies.add(sn);
 		}
 	}
+	
+	private void populateItems() {
+		
+		// populate items
+		items = new ArrayList<Item>();
+		
+		Treasurebox tr;
+		Bomb b;
+		Point[] points = new Point[] {
+			new Point(170, 200),
+		};
+		
+		for(int i = 0; i < points.length; i++) {
+			b = new Bomb(tileMap);
+			b.setPosition(points[i].x, points[i].y);
+			items.add(b);
+		}
+	}
 	@Override
 	public void update() {
 		
@@ -104,6 +127,9 @@ public class Level1State extends GameState{
 		// attack enemies
 		player.checkAttack(enemies);
 		
+		// chcek items
+		player.checkTouch(items);
+		
 		// update all enemies
 		for(int i = 0; i < enemies.size(); i++) {
 			Enemy e = enemies.get(i);
@@ -115,6 +141,15 @@ public class Level1State extends GameState{
 						// 因為 e已經不在enemies中所以不會被畫出來，但e仍存在所以可以執行methods
 						new Explosion(e.getX(),e.getY())
 				);
+			}
+		}
+		
+		// update all items
+		for(int i = 0; i< items.size(); i++) {
+			items.get(i).update();
+			if(items.get(i).shouldRemove()) {
+				items.remove(i);
+				i--;
 			}
 		}
 		
@@ -143,6 +178,11 @@ public class Level1State extends GameState{
 		// draw enemies
 		for(int i = 0; i < enemies.size(); i++) {
 			enemies.get(i).draw(g);		
+		}
+		
+		// draw items
+		for(int i = 0; i < items.size(); i++) {
+			items.get(i).draw(g);
 		}
 		
 		// draw explosion

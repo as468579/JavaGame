@@ -7,13 +7,16 @@ public class Animation {
 	private BufferedImage[] frames;
 	private int currentFrame;
 	
+	
 	private long startTime;
 	private long delay;
 	
 	private boolean playedOnce;  // record whether the animation has already played once 
+	private boolean loop;
 	
 	public Animation() {
 		playedOnce = false;
+		loop = true;
 	}
 	
 	public void setFrames(BufferedImage[] frames) {
@@ -32,16 +35,19 @@ public class Animation {
 		
 		long elapsed = (System.nanoTime() - startTime) / 1000000;
 		if(elapsed > delay) {
+			if(playedOnce  && !loop) return;
 			currentFrame++;
 			startTime = System.nanoTime();
 		}
 		
 		if(currentFrame == frames.length) {
-			currentFrame = 0;
+			if(loop)currentFrame = 0;
+			else currentFrame--;
 			playedOnce = true;
 		}
 	}
 	
+	public void setLoop(boolean loop) { this.loop = loop; }
 	public int getCurrentFrame() { return currentFrame; }
 	public BufferedImage getImage() { return frames[currentFrame]; }
 	public boolean hasPlayedOnce() { return playedOnce; }

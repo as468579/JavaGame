@@ -139,6 +139,18 @@ public class Player extends MapObject{
 	
 	public void setGliding(boolean b) { gliding = b; }
 	
+	public void checkTouch(ArrayList<Item> items) {
+		
+		// loop items
+		for(int i = 0; i < items.size(); i++) {
+			
+			Item it = items.get(i);
+			if(intersects(it)) {
+				it.setTouched();
+			}
+		}
+	}
+	
 	public void checkAttack(ArrayList<Enemy> enemies) {
 		
 		// loop through enemies
@@ -177,7 +189,6 @@ public class Player extends MapObject{
 				if(fireBalls.get(j).intersects(e)) {
 					e.hit(fireBallDamage);
 					fireBalls.get(j).setHit();
-					break; // cuz enemy dies after be hit
 				}
 			}
 			
