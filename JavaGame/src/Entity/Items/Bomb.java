@@ -11,7 +11,6 @@ import TileMap.TileMap;
 
 public class Bomb extends Item{
 	
-	private int money;
 	private BufferedImage[] sprites;
 	
 	public Bomb(TileMap tm) {
@@ -70,7 +69,7 @@ public class Bomb extends Item{
 		checkTileMapCollision();
 		setPosition(xtemp,ytemp);
 		
-		// update animation and bomb will disapper after touching
+		// update animation and bomb will disappear after touching
 		if(touched) {
 			animation.update();
 			if(animation.hasPlayedOnce()) {
@@ -87,6 +86,7 @@ public class Bomb extends Item{
 		if(animation.getCurrentFrame() == 10) {
 			
 			// 突然增加太多 可能導致不小心超過Blocked Tile 導致 bomb移動
+			// i.e 從leftCollide變成rightCollide
 			//cwidth = 60;
 			//cheight = 60;
 		}

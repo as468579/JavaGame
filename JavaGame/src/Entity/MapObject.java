@@ -89,8 +89,8 @@ public abstract class MapObject {
  	public Rectangle getRectangle() {
  		
  		return new Rectangle(
- 				(int)x - cwidth,
- 				(int)y - cheight,
+ 				(int)x - (cwidth / 2),
+ 				(int)y - (cheight / 2),
  				cwidth,
  				cheight
  		);
@@ -265,8 +265,9 @@ public abstract class MapObject {
 	public void drawCollisionBox(Graphics2D g) {
 		g.setColor(Color.BLUE);
 		Rectangle r = getRectangle();
-		r.x += ( xmap + cwidth / 2 );
-		r.y += ( ymap + cheight / 2 );
+		
+		r.x += ( xmap );
+		r.y += ( ymap );
 		g.draw(r);
 	}
 	
