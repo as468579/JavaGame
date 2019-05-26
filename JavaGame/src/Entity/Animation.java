@@ -6,7 +6,7 @@ public class Animation {
 
 	private BufferedImage[] frames;
 	private int currentFrame;
-	
+	private int numFrames;
 	
 	private long startTime;
 	private long delay;

@@ -18,9 +18,10 @@ public class Player extends MapObject{
 	private int maxHealth;
 	private int fire;    // fire / fireCost = number of bullets
 	private int maxFire; // maximum number of bullets
-	private boolean dead;
 	private boolean flinching;
 	private long flinchTimer;
+	private long time;
+	private int score;
 	             
 	// fireball
 	private boolean firing;
@@ -38,8 +39,18 @@ public class Player extends MapObject{
 	
 	// animation
 	private ArrayList<BufferedImage[]> sprites;
-	private final int[] numFrames = {
+	private final int[] NUMFRAMES = {
 		2, 8, 1, 2, 4, 2, 5	
+	};
+	private final int[] FRAMEWIDTHS = {
+		30, 30, 30, 30, 30, 30, 60	
+	};
+	
+	private final int[] FRAMEHEIGHTS = {
+		30,	30, 30, 30, 30, 30, 30
+	};
+	private final int[] SPRITEDELAYS = {
+		400, 40, -1, 100, 100, 100, 50
 	};
 	
 	// animation actions
@@ -50,6 +61,7 @@ public class Player extends MapObject{
 	private static final int GLIDING = 4;
 	private static final int FIREBALL = 5;
 	private static final int SCRATCHING = 6;
+	private static final int DYING = 7;
 	
 	private HashMap<String, AudioPlayer> sfx;
 	public Player(TileMap tm) {
@@ -89,49 +101,52 @@ public class Player extends MapObject{
 				)
 			);
 			
+			int imageY = 0;
 			sprites = new ArrayList<BufferedImage[]>();
-			
 			for(int i = 0; i < 7 ; i++) {
-				BufferedImage[] bi = new BufferedImage[numFrames[i]];
-				for(int j = 0; j < numFrames[i]; j++) {
-					if(i!=6) {
-						bi[j] = spritesheet.getSubimage(
-								j * width,
-								i * height,
-								width,
-								height
-						);
-					}
-					else {
-						bi[j] = spritesheet.getSubimage(
-								j * width * 2,
-								i * height,
-								width * 2,
-								height
-						);
-					}
+				BufferedImage[] bi = new BufferedImage[NUMFRAMES[i]];
+				for(int j = 0; j < NUMFRAMES[i]; j++) {
+					bi[j] = spritesheet.getSubimage(
+							j * FRAMEWIDTHS[i],
+							imageY,
+							FRAMEWIDTHS[i],
+							FRAMEHEIGHTS[i]
+					);
 				}
 				sprites.add(bi);
+				imageY += FRAMEHEIGHTS[i];
 			}
 			
 			
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		
 		animation = new Animation();
-		currentAction = IDLE;
-		animation.setFrames(sprites.get(IDLE));
-		animation.setDelay(400);
+		setAnimation(IDLE);
 		sfx = new HashMap<String, AudioPlayer>();
 		sfx.put("jump",new AudioPlayer("/SFX/jump.mp3"));
 		sfx.put("scratch", new AudioPlayer("/SFX/scratch.mp3"));
 	}
 	
+	// health
+	public void setHealth(int h) { health = h; }
 	public int getHealth() { return health; }
 	public int getMaxHealth() { return maxHealth; }
+	
+	// fire
+	public void setFire(int f) { fire = f; }
 	public int getFire() { return fire; }
 	public int getMaxFire() { return maxFire; }
+	
+	// time
+	public void setTime(int t) { time = t; }
+	public long getTime() { return time; }
+	
+	
+	// score
+	public void increaseScore(int score) { this.score += score; }
+	public int getScore() { return score; }
+	
 	
 	public void setFiring() { firing = true;}
 	
@@ -204,9 +219,20 @@ public class Player extends MapObject{
 		if(flinching) return ;
 		health -= damage;
 		if(health < 0) health = 0;
-		if(health == 0) dead = true;
 		flinching = true;
 		flinchTimer = System.nanoTime();
+	}
+	
+	public void reset() {
+		health = maxHealth;
+		facingRight = true;
+		currentAction = IDLE;
+		stop();
+	}
+	
+	public void stop() {
+		left = right = up = down = flinching =
+			jumping = scratching = firing = gliding = false;
 	}
 	
 	private void getNextPosition() {
@@ -268,6 +294,19 @@ public class Player extends MapObject{
 		}
 	}
 	
+	private void setAnimation(int i) {
+		currentAction = i;
+		animation.setFrames(sprites.get(currentAction));
+		animation.setDelay(SPRITEDELAYS[currentAction]);
+		width = FRAMEWIDTHS[currentAction];
+		height = FRAMEHEIGHTS[currentAction];
+	}
+	
+	public void setDead() {
+		health = 0;
+		stop();
+	}
+	
 	public void update() {
 		
 		// update position
@@ -318,60 +357,50 @@ public class Player extends MapObject{
 		if(scratching) {
 			sfx.get("scratch").play();
 			if(currentAction != SCRATCHING) {
-				currentAction = SCRATCHING;
-				animation.setFrames(sprites.get(SCRATCHING));
-				animation.setDelay(50);
-				width = 60;
+				setAnimation(SCRATCHING);
 			}
 		}
 		else if(firing) {
 			if(currentAction != FIREBALL) {
-				currentAction = FIREBALL;
-				animation.setFrames(sprites.get(FIREBALL));
-				animation.setDelay(100);
-				width = 30;
+				setAnimation(FIREBALL);
 			}
 		}
 		else if(dy > 0) {
 			if(gliding) {
 				if(currentAction != GLIDING) {
-					currentAction = GLIDING;
-					animation.setFrames(sprites.get(GLIDING));
-					animation.setDelay(100);
-					width = 30;
+					setAnimation(GLIDING);
 				}
 			}
 			else{
 				if(currentAction != FALLING) {
-					currentAction = FALLING;
-					animation.setFrames(sprites.get(FALLING));
-					animation.setDelay(100);
-					width = 30;
+					setAnimation(FALLING);
 				}
 			}
 		}
 		else if(dy < 0){
 			if(currentAction != JUMPING) {
-				currentAction = JUMPING;
-				animation.setFrames(sprites.get(JUMPING));
-				animation.setDelay(-1); // jumping doesn't need animation
-				width = 30;
+				setAnimation(JUMPING);
 			}
+			
 		}
 		else if(left || right) {
 			if(currentAction != WALKING) {
-				currentAction = WALKING;
-				animation.setFrames(sprites.get(WALKING));
-				animation.setDelay(40);
-				width = 30;
+				setAnimation(WALKING);
+			}
+		}
+		else if(health == 0) {
+			if(currentAction != DYING) {
+				// setAnimation(DYING);
+				
+				currentAction = DYING;
+				//animation.setFrames(sprites.get(DYING));
+				//animation.setDelay(40);
+				//width = 30;
 			}
 		}
 		else { // idle
 			if(currentAction != IDLE) {
-				currentAction = IDLE;
-				animation.setFrames(sprites.get(IDLE));
-				animation.setDelay(400);
-				width = 30;
+				setAnimation(IDLE);
 			}
 		}
 		animation.update();
