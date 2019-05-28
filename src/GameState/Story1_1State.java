@@ -39,8 +39,8 @@ public class Story1_1State extends LevelState{
 		
 		bg = new Background("/Backgrounds/story_bg.gif",0.5);
 		
-		basicFont = new Font(Font.DIALOG, Font.PLAIN, 10);
-		storyFont = new Font(Font.SANS_SERIF, Font.PLAIN, 20);
+		basicFont = new Font("Arial", Font.PLAIN, 10);
+		storyFont = new Font(Font.SERIF, Font.PLAIN, 20);
 		
 		basicColor = new Color(0, 0, 0);
 		storyColor = new Color(0, 0, 0);

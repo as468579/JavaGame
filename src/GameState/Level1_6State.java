@@ -26,8 +26,8 @@ public class Level1_6State extends LevelState {
 	public void init() {
 		System.out.println("level 1-6");
 
-		levelTileY = 134;
-		levelTileHeight = 27;
+		levelTileY = 135;
+		levelTileHeight = 26;
 
 		bg = new Background("/Backgrounds/background_1_6.gif", 0.5);
 
@@ -80,7 +80,7 @@ public class Level1_6State extends LevelState {
 	public void update() {
 		super.update();
 
-		if (player.getY() < (levelTileY) * 16) {
+		if (player.getY() < (levelTileY-1) * 16) {
 			gsm.setStates(GameStateManager.LEVEL1_5STATE);
 		}
 

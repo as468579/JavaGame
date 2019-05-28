@@ -30,7 +30,7 @@ public class Level1_1State extends LevelState {
 		System.out.println("level 1-1");
 
 		levelTileY = 0;
-		levelTileHeight = 27;
+		levelTileHeight = 26;
 
 		bg = new Background("/Backgrounds/background_1_1.gif", 0.5);
 

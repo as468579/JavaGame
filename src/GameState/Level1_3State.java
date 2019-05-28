@@ -27,8 +27,8 @@ public class Level1_3State extends LevelState {
 	public void init() {
 		System.out.println("level 1-3");
 
-		levelTileY = 53;
-		levelTileHeight = 27;
+		levelTileY = 54;
+		levelTileHeight = 26;
 
 		bg = new Background("/Backgrounds/background_1_3.gif", 0.5);
 
@@ -81,7 +81,7 @@ public class Level1_3State extends LevelState {
 	public void update() {
 		super.update();
 
-		if (player.getY() < (levelTileY) * 16) {
+		if (player.getY() < (levelTileY-1) * 16) {
 			gsm.setStates(GameStateManager.LEVEL1_2STATE);
 		}
 

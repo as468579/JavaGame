@@ -27,7 +27,7 @@ public class Level1_2State extends LevelState {
 		System.out.println("level 1-2");
 
 		levelTileY = 27;
-		levelTileHeight = 27;
+		levelTileHeight = 26;
 
 		bg = new Background("/Backgrounds/background_1_2.gif", 0.5);
 
@@ -83,7 +83,7 @@ public class Level1_2State extends LevelState {
 		// check enter story
 		// System.out.println(player.getX()+" "+player.getY());
 
-		if (player.getY() < (levelTileY) * 16) {
+		if (player.getY() < (levelTileY-1) * 16) {
 			if (false) { // 達到真結局條件
 				gsm.setStates(GameStateManager.ENDING_STATE_3);
 			} else {

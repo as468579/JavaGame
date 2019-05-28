@@ -184,7 +184,7 @@ public abstract class LevelState extends GameState{
 		// draw player
 		player.draw(g);
 		
-		tileMap.drawTransParentBlock(g, levelTileY, levelTileHeight);
+		tileMap.drawTransparent(g, levelTileY, levelTileHeight);
 		
 		// draw enemies
 		for(int i = 0; i < enemies.size(); i++) {

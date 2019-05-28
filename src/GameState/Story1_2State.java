@@ -85,7 +85,7 @@ public class Story1_2State extends LevelState{
 		bg.draw(g);
 		tileMap.draw(g, levelTileY, levelTileHeight);
 		player.draw(g);
-		tileMap.drawTransParentBlock(g, levelTileY, levelTileHeight);
+		tileMap.drawTransparent(g, levelTileY, levelTileHeight);
 		
 		
 		g.setFont(basicFont);
@@ -139,7 +139,7 @@ public class Story1_2State extends LevelState{
 			player.setRight(true);
 		}
 		
-		if(player.getX() >= 2370 && player.getX() <= 2380){
+		if(player.getX() >= 2360 && player.getX() <= 2400){
 			player.setJumping(true);
 		}else {
 			player.setJumping(false);
