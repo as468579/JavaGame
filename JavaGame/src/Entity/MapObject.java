@@ -58,6 +58,9 @@ public abstract class MapObject {
 	protected boolean down;
 	protected boolean jumping;
 	protected boolean falling;
+	protected boolean climbing;
+
+	
 	
 	// movement attributes
  	protected double moveSpeed;
@@ -69,10 +72,10 @@ public abstract class MapObject {
  	protected double stopJumpSpeed;
  	
  	// four corners
- 	private boolean topCollided;
- 	private boolean bottomCollided;
- 	private boolean leftCollided;
- 	private boolean rightCollided;
+ 	protected boolean topCollided;
+ 	protected boolean bottomCollided;
+ 	protected boolean leftCollided;
+ 	protected boolean rightCollided;
  	
  	// constructor
  	public MapObject(TileMap tm) {
@@ -86,11 +89,16 @@ public abstract class MapObject {
  		return r1.intersects(r2);
  	}
  	
+ 	public boolean intersects(Rectangle r2) {
+ 		Rectangle r1 = getRectangle();
+ 		return r1.intersects(r2);
+ 	}
+ 	
  	public Rectangle getRectangle() {
  		
  		return new Rectangle(
- 				(int)x - (cwidth / 2),
- 				(int)y - (cheight / 2),
+ 				(int)(x + xmap - (cwidth / 2)),
+ 				(int)(y + ymap - (cheight / 2)),
  				cwidth,
  				cheight
  		);
@@ -166,6 +174,7 @@ public abstract class MapObject {
  			if(bottomCollided) {
  				dy = 0;
  				falling = false;
+ 				climbing = false;
  			    // if cheight /2 > tileSize , the MapObject will bounce 
  				ytemp = (currentRow + 1) * tileSize - cheight / 2;
  			}
@@ -194,7 +203,7 @@ public abstract class MapObject {
  			}
  		}
  		
- 		if(!falling) {
+ 		if(!falling && !climbing) {
  			calculateEdges(x, ydest + 1);
  			if(!bottomCollided) {
  				falling = true;
@@ -259,15 +268,12 @@ public abstract class MapObject {
 		}
 		
 		// draw for test
-		drawCollisionBox(g);
+//		drawCollisionBox(g);
  	}
  	
 	public void drawCollisionBox(Graphics2D g) {
 		g.setColor(Color.BLUE);
 		Rectangle r = getRectangle();
-		
-		r.x += ( xmap );
-		r.y += ( ymap );
 		g.draw(r);
 	}
 	

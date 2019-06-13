@@ -3,11 +3,13 @@ package GameState;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
+import Audio.AudioPlayer;
 import TileMap.Background;
 
 public class MenuState extends GameState{
 	
 	private Background bg;
+	private AudioPlayer bgMusic;
 	
 	private int currentChoice = 0;
 	private String[] options = {
@@ -22,14 +24,14 @@ public class MenuState extends GameState{
 	
 	public MenuState(GameStateManager gsm){
 		this.gsm = gsm;
+		init();
 		
 		try {
 
-			// test /
-			bg = new Background("/Backgrounds/background.jpg",1);
+			bg = new Background("/Backgrounds/morning.jpg",1);
 			bg.setVector(-0.1, 0);
-			//bg.setVector(0.0, 0.0);
-			//bg.setPosition(200, 300);
+			bg.setPosition(0, 0);
+			
 			titleColor = new Color(128,0,0);
 			titleFont = new Font(
 					"Century Gothic",
@@ -50,7 +52,8 @@ public class MenuState extends GameState{
 
 	@Override
 	public void init() {
-		
+		bgMusic = new AudioPlayer("/Music/MenuMusic.mp3");
+		bgMusic.play();
 	}
 
 	@Override
@@ -85,8 +88,8 @@ public class MenuState extends GameState{
 	
 	private void select(){
 		if(currentChoice == 0){
-			// start 
-			gsm.setStates(GameStateManager.LEVEL1STATE);
+			// load image 
+			gsm.setStates(GameStateManager.STORY1_1STATE);
 		}
 		else if(currentChoice == 1){
 			// help
@@ -100,6 +103,7 @@ public class MenuState extends GameState{
 	public void keyPressed(int k) {
 		if(k == KeyEvent.VK_ENTER){
 			select();
+			bgMusic.close();
 		}
 		else if(k == KeyEvent.VK_UP){
 			currentChoice--;
@@ -122,6 +126,5 @@ public class MenuState extends GameState{
 		// TODO Auto-generated method stub
 		
 	}
-
 	
 }

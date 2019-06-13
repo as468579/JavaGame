@@ -25,11 +25,11 @@ public class Coin extends Item{
 	public Coin(TileMap tm) {
 		super(tm);
 		
-		money = 1000;
-		width = 30;
-		height = 30;
-		cwidth = 30;
-		cheight = 30;
+		money = 50;
+		width = 24;
+		height = 24;
+		cwidth = 24;
+		cheight = 24;
 		
 		firstTouch  = true;
 		
@@ -66,6 +66,8 @@ public class Coin extends Item{
 				e.printStackTrace();
 		}
 	}
+	
+	public int getMoney() { return money; }
 	
 	@Override 
 	public void update() {
@@ -120,12 +122,12 @@ public class Coin extends Item{
 		if(touched) {
 			g.drawString(
 					s,
-					(int)(x + xmap - (width / 2) - s.length() * 3 ),
+					(int)(x + xmap - (width / 2) - s.length() * 2 ),
 					(int)(y + ymap - height));
 		}
 		
 		// draw for test
-		drawCollisionBox(g);
+//		drawCollisionBox(g);
 	}
 	
 	

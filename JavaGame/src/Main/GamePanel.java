@@ -97,7 +97,7 @@ public class GamePanel extends JPanel
 	private void init(){
 		image = new BufferedImage(WIDTH, HEIGHT, 
 					BufferedImage.TYPE_3BYTE_BGR);
-		g = (Graphics2D)image.getGraphics(); // ?
+		g = (Graphics2D)image.getGraphics();
 		
 		running = true;
 		
@@ -122,7 +122,7 @@ public class GamePanel extends JPanel
 				HEIGHT * SCALE,
 				null
 		);
-		g2.dispose(); // ?
+		g2.dispose(); // release resource of g
 	}
 	
 

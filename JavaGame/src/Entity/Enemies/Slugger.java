@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 
 import Entity.Animation;
 import Entity.Enemy;
+import GameState.LoadState;
 import TileMap.TileMap;
 
 public class Slugger extends Enemy{
@@ -32,29 +33,7 @@ public class Slugger extends Enemy{
 		damage = 1;
 		
 		// load sprites
-		try {
-			
-			BufferedImage spritesheet = ImageIO.read(
-				getClass().getResourceAsStream(
-					"/Sprites/Enemies/slugger.gif"
-				)
-			);
-			
-			sprites = new BufferedImage[3];
-			for(int i = 0; i < sprites.length; i++) {
-				sprites[i] = spritesheet.getSubimage(
-											i * width,
-											0,
-											width,
-											height
-										);
-			}
-			
-			
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
+		sprites = LoadState.Slugger[0];
 		
 		animation = new Animation();
 		animation.setFrames(sprites);
@@ -120,6 +99,8 @@ public class Slugger extends Enemy{
 		
 		// update animation
 		animation.update();
+		
+		if(dead) remove = true;
 	}
 	
 	@Override

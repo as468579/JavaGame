@@ -1,5 +1,6 @@
 package Entity;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import TileMap.TileMap;
@@ -25,7 +26,13 @@ public abstract class Item extends MapObject{
 	public boolean shouldRemove() {
 		return remove;
 	}
+	
+	public void draw(Graphics2D g) {
+		super.draw(g);
+	};
 
 	public abstract void update();
+	
+	
 	
 }

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import Audio.AudioPlayer;
-import Entity.Enemies.IronCannon;
 import Entity.Items.Coin;
 import Entity.Items.Treasurebox;
 import TileMap.Tile;
@@ -15,18 +14,15 @@ import TileMap.TileMap;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Player extends MapObject{
+public class NPC extends MapObject{
 
-	// player stuff
+	// NPC stuff
 	private int health;
 	private int maxHealth;
 	private int fire;    // fire / fireCost = number of bullets
 	private int maxFire; // maximum number of bullets
 	private boolean flinching;
-	private int money;
 	private long flinchTimer;
-	private long time;
-	private int score;
 	             
 	// fireball
 	private boolean firing;
@@ -41,14 +37,6 @@ public class Player extends MapObject{
 	
 	// gliding
 	private boolean gliding;
-	
-	// flying
-	private boolean wings;
-	
-	// double jumping
-	private double doubleJumpStart;
-	private boolean doubleJump;
-	private boolean alreadyDoubleJump;
 	
 	// animation
 	private ArrayList<BufferedImage[]> sprites;
@@ -71,52 +59,49 @@ public class Player extends MapObject{
 	private static final int WALKING = 1;
 	private static final int JUMPING = 2;
 	private static final int FALLING = 3;
-	private static final int GLIDING =  4;
+	private static final int GLIDING = 4;
 	private static final int FIREBALL = 5;
 	private static final int SCRATCHING = 6;
 	private static final int DYING = 7;
 	private static final int CLIMBING = 8;
 	
 	private HashMap<String, AudioPlayer> sfx;
-	public Player(TileMap tm) {
+	public NPC(TileMap tm) {
 		
 		super(tm);
+		
+		health = maxHealth = 100;
 		
 		width = 30;
 		height = 30;
 		cwidth = 20;
 		cheight = 20;
 		
-		moveSpeed = 0.18;
+		moveSpeed = 0.3;
 		//maxSpeed = 1.6;
-		maxSpeed = 3.0;
+		maxSpeed = 3.6;
 		stopSpeed = 0.4;
 		fallSpeed = 0.15;
 		maxFallSpeed = 4.0;
 		jumpStart = -3.8;
-		stopJumpSpeed = 0.3;
-		doubleJumpStart = -3.0;
-		money = 0;
+		stopJumpSpeed = 0.3;;
 		
 		facingRight = true;
 		
-		health = maxHealth = 5;
 		fire = maxFire = 2500;
 		
 		fireCost = 200;
-		fireBallDamage = 5;
+		fireBallDamage = 0;
 		fireBalls = new ArrayList<FireBall>();
 		
-		scratchDamage = 8;
+		scratchDamage = 0;
 		scratchRange = 30;
-		
-		wings = false;
 		
 		// load sprites
 		try {
 			BufferedImage spritesheet = ImageIO.read(
 				getClass().getResourceAsStream(
-					"/Sprites/Player/playersprites.gif"
+					"/Sprites/NPC/NPCsprites.gif"
 				)
 			);
 			
@@ -148,40 +133,14 @@ public class Player extends MapObject{
 		sfx.put("fireBall", new AudioPlayer("/SFX/fireBall.mp3"));
 	}
 	
-	
-	
-	// health
-	public void setHealth(int h) { health = h; }
-	public int getHealth() { return health; }
-	public int getMaxHealth() { return maxHealth; }
-	
 	// fire
-	public void setFiring() { 
-		if(!scratching) {
-			firing = true;
-		}
-	}
+	public void setFire(int f) { fire = f; }
 	public int getFire() { return fire; }
 	public int getMaxFire() { return maxFire; }
 	
-	// time
-	public void setTime(int t) { time = t; }
-	public long getTime() { return time; }
+	public void setFiring() { firing = true;}
 	
-	
-	// score
-	public void increaseScore(int score) { this.score += score; }
-	public int getScore() { return score; }
-	
-	// money
-	public int getMoney() { return money; }
-	public void setMoney(int money) { this.money = money; }
-	
-	public void setScratching() { 
-		if(!firing) {
-			scratching = true;
-		}
-	}
+	public void setScratching() { scratching = true;}
 	
 	public void setLeft(boolean b) {
 		// cannot move left while climbing
@@ -192,25 +151,17 @@ public class Player extends MapObject{
 	}
 	
 	public void setRight(boolean b) {
+		
 		// cannot move right while climbing
 		if(!climbing) {
 			right = b;
 		}
 	}
 	
-	public void setUp(boolean b) {
-		if(hasWings() && gliding) setFlyingUp(b);
-		else setClimbUp(b);
-	}
-	
-	public void setFlyingUp(boolean b) {
-		if(b) {
-			scratching = firing = false;
-		}
-		up = b;
-	}
-	
 	public void setClimbUp(boolean b){
+		
+		int x = (int)this.x;
+		int y = (int)this.y;
 		
 		// set climbing when tile is climbable
 		if(isClimbable()) {
@@ -227,18 +178,7 @@ public class Player extends MapObject{
 		}
 	}
 	
-	public void setDown(boolean b) {
-		if(hasWings() && gliding) setFlyingDown(b);
-		else setClimbDown(b);
-	}
-	
-	public void setFlyingDown(boolean b) {
-		if(b) {
-			scratching = firing = false;
-		}
-		down = b;
-	}
- 	public void setClimbDown(boolean b) {
+	public void setClimbDown(boolean b) {
 		
 		int x = (int)this.x;
 		int y = (int)this.y;
@@ -267,117 +207,53 @@ public class Player extends MapObject{
 	}
 	
 	public void setJumping(boolean b) {
-		if(b && !jumping && falling && !alreadyDoubleJump) {
-			doubleJump = true;
+		if(b && !jumping && falling ) {
+			return;
 		}
-		jumping = b;
+		jumping = true;
 		
 		// jumping will cancel climbing
 		climbing = false;
 	}
 	
-	public void setGliding(boolean b) {
-		gliding = b;
-	}
+	public void setGliding(boolean b) { gliding = b; }
 	
-	public void setWings(boolean wings) {
-		this.wings = wings;
-	}
+	public void checkAttack(Player player) {
 	
-	public boolean isUp() {
-		return up;
-	}
-	
-	public void checkTouch(ArrayList<Item> items) {
-		
-		// loop items
-		for(int i = 0; i < items.size(); i++) {
+		// scratch attack
+		if(scratching) {
 			
-			Item it = items.get(i);
-			if(intersects(it)) {
-				if(it instanceof Coin && !it.isTouched()) {
-					Coin c = (Coin)it;
-					setMoney(getMoney() + c.getMoney());
-				}
-				else if(it instanceof Treasurebox && !it.isTouched()) {
-					Treasurebox t = (Treasurebox)it;
-					setMoney(getMoney() + t.getMoney());
-				}
-				it.setTouched();
+			Rectangle scratchBox;
+			
+			if(facingRight) {
+				scratchBox = new Rectangle(
+								(int)(x + xmap + cwidth / 2),
+								(int)(y + ymap - cheight / 2),
+								scratchRange,
+								cheight
+							);
+			}
+			else {
+				scratchBox = new Rectangle(
+								(int)(x + xmap - cwidth / 2) - scratchRange,
+								(int)(y + ymap - cheight / 2),
+								scratchRange,
+								cheight
+							);
+			}
+			if(player.intersects(scratchBox)){
+				player.hit(scratchDamage);
 			}
 		}
-	}
-	
-	public void checkAttack(ArrayList<Enemy> enemies) {
-		
-		// loop through enemies
-		for(int i = 0; i < enemies.size(); i++) {
-			Enemy e = enemies.get(i);
-			
-			// while scratching, player's attack range is out of player's width
-			// So we can not use intersects method 
-			// scratch attack
-			if(scratching) {
-				
-				Rectangle scratchBox;
-				
-				if(facingRight) {
-					scratchBox = new Rectangle(
-									(int)(x + xmap + cwidth / 2),
-									(int)(y + ymap - cheight / 2),
-									scratchRange,
-									cheight
-								);
-				}
-				else {
-					scratchBox = new Rectangle(
-									(int)(x + xmap - cwidth / 2) - scratchRange,
-									(int)(y + ymap - cheight / 2),
-									scratchRange,
-									cheight
-								);
-				}
-				if(e.intersects(scratchBox)){
-					e.hit(scratchDamage);
-				}
-			}
 
-			// fireball attack
-			for(int j = 0; j < fireBalls.size(); j++) {
-				FireBall f = fireBalls.get(j);
-				if(f.intersects(e) && !f.getHit()) {
-					e.hit(fireBallDamage);
-					fireBalls.get(j).setHit();
-				}
-			}
-			
-			// chcek enemy collision
-			if(intersects(e)) {
-				hit(e.getDamage());
-			}
-			
-			if(e instanceof IronCannon) {
-				IronCannon ic = (IronCannon) e;
-				ic.checkAttack(this);
+		// fireball attack
+		for(int j = 0; j < fireBalls.size(); j++) {
+			FireBall f = fireBalls.get(j);
+			if(f.intersects(player) && !f.getHit()) {
+				player.hit(fireBallDamage);
+				fireBalls.get(j).setHit();
 			}
 		}
-		
-	}
-	
-	public void hit(int damage) {
-		if(flinching) return ;
-		health -= damage;
-		if(health < 0) health = 0;
-		flinching = true;
-		flinchTimer = System.nanoTime();
-	}
-	
-	public void reset() {
-		health = maxHealth;
-		fire = maxFire;
-		facingRight = true;
-		currentAction = IDLE;
-		stop();
 	}
 	
 	public void drawScratchBox(Graphics2D g) {
@@ -436,18 +312,14 @@ public class Player extends MapObject{
 		}
 			
 		if(climbing) {
-			
 			if(up) {
 				dy -= moveSpeed;
-				
-				if(dy > 0) dy = 0;
 				if(dy < -maxSpeed) {
 					dy = -maxSpeed;
 				}
 			}
 			else if(down) {
 				dy += moveSpeed;
-				if(dy < 0) dy = 0;
 				if(dy > maxSpeed) {
 					dy = maxSpeed;
 				}
@@ -464,24 +336,6 @@ public class Player extends MapObject{
 					if(dy > 0) {
 						dy = 0;
 					}
-				}
-			}
-		}
-		
-		if(gliding && hasWings()) {
-			
-			if(up) {
-				dy -= moveSpeed;
-				if(dy > 0) dy = 0;
-				if(dy < -maxSpeed) {
-					dy = -maxSpeed;
-				}
-			}
-			else if(down) {
-				dy += moveSpeed;
-				if(dy < 0) dy = 0;
-				if(dy > maxSpeed) {
-					dy = maxSpeed;
 				}
 			}
 		}
@@ -505,26 +359,16 @@ public class Player extends MapObject{
 			falling = true;
 		}
 		
-		if(doubleJump) {
-			dy = doubleJumpStart;
-			alreadyDoubleJump = true;
-			doubleJump = false;
-		}
-		
-		if(!falling) alreadyDoubleJump = false;
-		
 		// falling
 		if(falling) {
-			if(dy > 0 && gliding && !hasWings()) {
-				dy += fallSpeed * 0.1;
-			}
+			if(dy > 0 && gliding) dy += fallSpeed * 0.1;
 			else dy += fallSpeed;
 			
 			if(dy > 0) jumping = false; 
 			
 			// the longer press the jump btn then jump higher
 			// press jump btn jumping = true, release jump btn or dy > 0 jumping = false
-			if(dy < 0 && !jumping && !(gliding && hasWings())) dy += stopJumpSpeed;
+			if(dy < 0 && !jumping) dy += stopJumpSpeed;
 			
 			if(dy > maxFallSpeed) dy = maxFallSpeed;
 		}
@@ -538,114 +382,10 @@ public class Player extends MapObject{
 		height = FRAMEHEIGHTS[currentAction];
 	}
 	
-	public void setDead() {
+	/*public void setDead() {
 		health = 0;
 		stop();
-	}
-	
-	@Override
- 	public void calculateEdges(double x, double y) {
- 		
- 		super.calculateEdges(x, y);
- 		
- 		int leftTile = (int)(x - cwidth / 2) / tileSize;
- 		int rightTile = (int)(x + cwidth / 2 - 1) / tileSize;
- 		int topTile = (int)(y - cheight / 2) / tileSize;
- 		int bottomTile = (int)(y + cheight / 2 - 2) / tileSize;
-
- 		
- 		for(int i = leftTile; i <= rightTile; i++) {
- 			
- 	 		// check top edge
- 			int type = tileMap.getType(topTile, i) ;
-
- 			// if encounter coin block
- 			if(type == Tile.COIN)  {
- 				setMoney(money + 1);
- 				tileMap.setFunctionBlockMap(topTile, i, 0);
- 			}
- 			
- 			// if encounter hazard block
- 			if(
- 				type == Tile.WATER ||
- 				type == Tile.DIRTY_WATER ||
- 				type == Tile.LAVA ||
- 				type == Tile.SPIKE
- 			) {
-
- 				hit(1);
- 			}
-
- 			
- 			// check bottom edge
- 			type = tileMap.getType(bottomTile, i) ;
-
- 			// if encounter coin block
- 			if(type == Tile.COIN)  {
- 				setMoney(money + 1);
- 				tileMap.setFunctionBlockMap(bottomTile, i, 0);
- 			}
- 			
- 			// if encounter hazard block
- 			if(
- 				type == Tile.WATER ||
- 				type == Tile.DIRTY_WATER ||
- 				type == Tile.LAVA ||
- 				type == Tile.SPIKE
- 			) {
- 				hit(1);
- 			}
- 			
- 			// if encounter transparent block
- 			if (tileMap.getType(topTile, i) == Tile.TRANSPARENT || tileMap.getType(bottomTile, i) == Tile.TRANSPARENT) 
- 				tileMap.setTransparent(getX(), getY());
- 			else tileMap.setTransparent(-1, -1);
- 		}
- 		
- 		for(int i = topTile; i <= bottomTile; i++) {
- 			
- 	 		// check left edge
- 			int type = tileMap.getType(i, leftTile);
- 			
- 			// if encounter coin block
- 			if(type == Tile.COIN)  {
- 				setMoney(money + 1);
- 				tileMap.setFunctionBlockMap(i, leftTile, 0);
- 			}
- 			
- 			// if encounter hazard block
- 			if(
- 				type == Tile.WATER ||
- 				type == Tile.DIRTY_WATER ||
- 				type == Tile.LAVA ||
- 				type == Tile.SPIKE
- 			) {
-
- 				hit(1);
- 			}
- 			
- 			
- 			// check right edge
- 			type = tileMap.getType(i, rightTile);
- 			
- 			// if encounter coin block
- 			if(type == Tile.COIN)  {
- 				setMoney(money + 1);
- 				tileMap.setFunctionBlockMap(i, rightTile, 0);
- 			}
- 			
- 			// if encounter hazard block
- 			if(
- 				type == Tile.WATER ||
- 				type == Tile.DIRTY_WATER ||
- 				type == Tile.LAVA ||
- 				type == Tile.SPIKE
- 			) {
-
- 				hit(1);
- 			}
- 		}		
- 	}
+	}*/
 	
 	public void update() {
 		
@@ -707,11 +447,6 @@ public class Player extends MapObject{
 			sfx.get("fireBall").play();
 			if(currentAction != FIREBALL) {
 				setAnimation(FIREBALL);
-			}
-		}
-		else if(hasWings() && gliding && falling) {
-			if(currentAction != GLIDING) {
-				setAnimation(GLIDING);
 			}
 		}
 		else if(dy > 0) {
@@ -787,9 +522,8 @@ public class Player extends MapObject{
 		}
 		
 		// draw scratch box
-//		drawScratchBox(g);
+		drawScratchBox(g);
 		super.draw(g);
 	}
 	
-	public boolean hasWings() { return wings; }
 }

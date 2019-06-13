@@ -10,35 +10,36 @@ import Entity.Enemy;
 import GameState.LoadState;
 import TileMap.TileMap;
 
-public class Alligator extends Enemy{
+public class Bat extends Enemy{
 	private BufferedImage[] sprites;
 	
-	public Alligator(TileMap tm) {
+	public Bat(TileMap tm) {
 		super(tm);
 		
-		moveSpeed = 0.7;
-		maxSpeed = 0.7;
+		moveSpeed = 1.0;
+		maxSpeed = 1.0;
 		fallSpeed = 0.2;
 		maxFallSpeed = 10.0;
 		
-		width = 48;
-		height = 48;
-		cwidth = 35;
-		cheight = 25;
+		width = 50;
+		height = 30;
+		cwidth = 50;
+		cheight = 30;
 		
-		health = maxHealth = 40;
-		damage = 2;
+		health = maxHealth = 10;
+		damage = 1;
 		
 		// load sprites
-		sprites = LoadState.Alligator[0];
+		sprites = LoadState.Bat[0];
 		
 		animation = new Animation();
 		animation.setFrames(sprites);
-		animation.setDelay(300);
+		animation.setDelay(100);
 		
 		// when the alligator start up, it is going to face left
-		right = false;
-		left = true;
+		up = false;
+		down = true;
+		falling = false;
 		facingRight = false;
 		
 	}
@@ -47,24 +48,81 @@ public class Alligator extends Enemy{
 		
 		// cuz a alligator only move left or right
 		// movement
-		if(left) {
-			dx -= moveSpeed;
-			if(dx < -maxSpeed) {
-				dx = -maxSpeed;
+		if(down) {
+			dy -= moveSpeed;
+			if(dy < -maxSpeed) {
+				dy = -maxSpeed;
 			}
 		}
-		else if(right) {
-			dx += moveSpeed;
-			if(dx > maxSpeed) {
-				dx = maxSpeed;
+		else if(up) {
+			dy += moveSpeed;
+			if(dy > maxSpeed) {
+				dy = maxSpeed;
 			}
-		}
-		
-		// falling
-		if(falling) {
-			dy += fallSpeed;
 		}
 	}
+	
+	@Override
+ 	public void checkTileMapCollision() {
+ 		
+ 		currentCol = (int)x / tileSize;
+ 		currentRow = (int)y / tileSize;
+ 		
+ 		xdest = x + dx;
+ 		ydest = y + dy;
+ 		
+ 		xtemp = x;
+ 		ytemp = y;
+ 		
+ 		calculateEdges(x,ydest);
+ 		
+ 		if(dy < 0) {
+ 			if(topCollided) {
+ 				dy = 0;
+ 				
+ 				// 即使下一刻就會撞上blocked tile，目前位置仍可能和blocked tile有極小差距 
+ 				// 所以算出合理座標帶入
+ 				ytemp = currentRow * tileSize + cheight / 2;
+ 				
+ 			}
+ 			else {
+ 				ytemp += dy;
+ 			}
+ 			
+ 		}
+ 		if(dy > 0) {
+ 			if(bottomCollided) {
+ 				dy = 0;
+ 				falling = false;
+ 				climbing = false;
+ 			    // if cheight /2 > tileSize , the MapObject will bounce 
+ 				ytemp = (currentRow + 1) * tileSize - cheight / 2;
+ 			}
+ 			else {
+ 				ytemp += dy;
+ 			}
+ 		}
+ 		
+ 		calculateEdges(xdest,y);
+ 		if(dx < 0) {
+ 			if(leftCollided) {
+ 				dx = 0;
+ 				xtemp = currentCol * tileSize + cwidth / 2;
+ 			}
+ 			else {
+ 				xtemp += dx;
+ 			}
+ 		}
+ 		if(dx > 0) {
+ 			if(rightCollided) {
+ 				dx = 0;
+ 				xtemp = (currentCol + 1) * tileSize - cwidth / 2;
+ 			}
+ 			else {
+ 				xtemp += dx;
+ 			}
+ 		}
+ 	}
 	
 	@Override
 	public void update() {
@@ -84,15 +142,13 @@ public class Alligator extends Enemy{
 		}
 		
 		// if it hits a wall, go the other direction
-		if(right && dx == 0) {
-			right = false;
-			left = true;
-			facingRight = false;
+		if(up && dy == 0) {
+			up = false;
+			down = true;
 		}
-		else if(left && dx == 0) {
-			right = true;
-			left = false;
-			facingRight = true;
+		else if(down && dy == 0) {
+			up = true;
+			down = false;
 		}
 		
 		// update animation
@@ -136,3 +192,4 @@ public class Alligator extends Enemy{
 //		drawCollisionBox(g);
 	}
 }
+

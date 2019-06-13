@@ -4,9 +4,11 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
+import javax.swing.text.AbstractDocument.Content;
 
 import Entity.Animation;
 import Entity.Enemy;
+import GameState.LoadState;
 import TileMap.TileMap;
 
 public class Snake extends Enemy{
@@ -30,29 +32,7 @@ public class Snake extends Enemy{
 		damage = 1;
 		
 		// load sprites
-		try {
-			
-			BufferedImage spritesheet = ImageIO.read(
-				getClass().getResourceAsStream(
-					"/Sprites/Enemies/snake.png"
-				)
-			);
-			
-			sprites = new BufferedImage[4];
-			for(int i = 0; i < sprites.length; i++) {
-				sprites[i] = spritesheet.getSubimage(
-											i * width,
-											0,
-											width,
-											height
-										);
-			}
-			
-			
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
+		sprites = LoadState.Snake[0];
 		
 		animation = new Animation();
 		animation.setFrames(sprites);
@@ -120,6 +100,8 @@ public class Snake extends Enemy{
 		
 		// update animation
 		animation.update();
+		
+		if(dead) remove = true;
 	}
 	
 	@Override
@@ -152,7 +134,7 @@ public class Snake extends Enemy{
 				);
 		}
 		// draw for test
-		drawCollisionBox(g);
+//		drawCollisionBox(g);
 	}
 	
 }

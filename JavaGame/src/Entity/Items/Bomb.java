@@ -47,7 +47,7 @@ public class Bomb extends Item{
 			// set animation
 			animation = new Animation();
 			animation.setFrames(sprites);
-			animation.setDelay(300);
+			animation.setDelay(200);
 		}catch(Exception e) {
 				e.printStackTrace();
 		}
@@ -77,6 +77,8 @@ public class Bomb extends Item{
 			}
 		}
 		
+
+		
 		// check explosion
 		checkExplosion();
 	}
@@ -85,8 +87,7 @@ public class Bomb extends Item{
 		
 		if(animation.getCurrentFrame() == 10) {
 			
-			// 突然增加太多 可能導致不小心超過Blocked Tile 導致 bomb移動
-			// i.e 從leftCollide變成rightCollide
+			// if cwidth, cheight become too large suddenly, could make object move
 			//cwidth = 60;
 			//cheight = 60;
 		}
@@ -100,6 +101,12 @@ public class Bomb extends Item{
 		setMapPosition();
 		
 		// if(notOnScreen) return ;
+		
+		// resume normal size
+		/*if(animation.getCurrentFrame() == 0) {
+			width = 30;
+			height = 30;
+		}*/
 		
 		// cuz bomb is facingLeft in the begining
 		if(facingRight) {
@@ -122,7 +129,7 @@ public class Bomb extends Item{
 		}
 		
 		// draw for test
-		drawCollisionBox(g);
+//		drawCollisionBox(g);
 	}
 	
 	

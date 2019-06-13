@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 
+import GameState.LoadState;
+
 public class Explosion {
 
 	private int x;
@@ -27,25 +29,8 @@ public class Explosion {
 		width = 60;
 		height = 60;
 		
-		try {
-			BufferedImage spritesheet = ImageIO.read(
-				getClass().getResourceAsStream(
-					"/Sprites/Enemies/explosion.gif"
-				)
-			);
-			
-			sprites = new BufferedImage[6];
-			for(int i = 0; i < sprites.length; i++) {
-				sprites[i] = spritesheet.getSubimage(
-											i * width,
-											0,
-											width,
-											height
-										);
-			}
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
+		// load sprites
+		sprites = LoadState.Explosion[0];
 		
 		animation = new Animation();
 		animation.setFrames(sprites);

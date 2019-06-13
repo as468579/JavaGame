@@ -85,6 +85,8 @@ public class Treasurebox extends Item{
 		}
 	}
 	
+	public int getMoney() { return money; }
+	
 	@Override 
 	public void update() {
 		
@@ -142,7 +144,7 @@ public class Treasurebox extends Item{
 					(int)(y + ymap - height / 2) - s.length());
 		}
 		// draw for test
-		drawCollisionBox(g);
+//		drawCollisionBox(g);
 	}
 	
 	

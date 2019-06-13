@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -49,6 +50,8 @@ public class TileMap {
 	private int[][] backgroundItemMap;
 	private ArrayList<Tile[][]> TilesSheet;
 	
+	private int[][] transparentTile;
+	
 	// drawing
 	private int rowOffset;   // tells which row to start drawing
 	private int colOffset;   // tells which column to start drawing
@@ -58,13 +61,25 @@ public class TileMap {
 	// JSON parser
 	private ArrayList<Integer> jsonFirstIDList = new ArrayList<>();
 	
+	// map shake
+	private Random random;
+	private double randomShakeX;
+	private double randomShakeY;
+	private boolean shaking;
+	
+	
 	public TileMap(int tileSize){
 		this.tileSize = tileSize;
 		 numRowsToDraw = ( GamePanel.HEIGHT / tileSize ) + 2; 
 		 numColsToDraw = ( GamePanel.WIDTH / tileSize ) + 2;
 		 tween = 0.07; 
 		 
+		 transparentTile = new int[9][2];
+		 
 		 TilesSheet = new ArrayList<Tile[][]>();
+		 
+		 shaking = false;
+		 
 	}
 	
 	
@@ -137,8 +152,8 @@ public class TileMap {
 					System.out.println("parsing: function_blocks...");
 					functionBlockMap = parse((JSONArray) layer.get("data"));
 				}
-				else if(type.contentEquals("opacity_blocks")) {
-					System.out.println("parsing: opacity_blocks...");
+				 else if (type.contentEquals("transparent_blocks")) {
+					System.out.println("parsing: transparent_blocks...");
 					transparentBlockMap = parse((JSONArray) layer.get("data"));
 				}
 			}
@@ -159,36 +174,10 @@ public class TileMap {
 	private int[][] parse(JSONArray arr){
 		int [][] layer = new int[numRows][numCols];
 		int data;
-		int firstgid = 0; // firstgid to recognize which type is this index belongs to
-		Tile[][] tileset = null;
 		try {
 			for(int row = 0; row < numRows; row++){
 				for(int col = 0; col < numCols; col++){
 					data = (int)(long)arr.get((row * numCols) + col);
-					
-					/* check index value to judge which sprite should use */
-//					if(dataIndex < jsonFirstIDList.get(0)){
-//						continue;
-//					}
-//					else if(dataIndex < jsonFirstIDList.get(1)) {	// tilesets[0]
-//						firstgid = jsonFirstIDList.get(0);
-//					}
-//					else if(dataIndex < jsonFirstIDList.get(2)) {	// tilesets[1]
-//						firstgid = jsonFirstIDList.get(1);
-//					}
-//					else if(dataIndex < jsonFirstIDList.get(3)) {	// tilesets[2]
-//						tileset = TilesSheet.get(0);
-//						firstgid = jsonFirstIDList.get(2);
-//					}
-//					else if(dataIndex < jsonFirstIDList.get(4)) {	// tilesets[3]
-//						tileset = TilesSheet.get(1);
-//						firstgid = jsonFirstIDList.get(3);
-//					}
-//					else {										// tilesets[4]
-//						firstgid = jsonFirstIDList.get(4);
-//					}
-					
-					//layer[row][col] = getTile(tileset, dataIndex, firstgid);
 					layer[row][col] = data;
 				}
 			}
@@ -206,22 +195,57 @@ public class TileMap {
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	
-	
-	
+	public boolean isShaking() { return shaking; }
+	public void setShaking(boolean shaking) { this.shaking = shaking; }
+
+
 	public int getType(int row, int col) {
-		
-		// int rc = map[row][col];
-		// int r = rc / numHorizontalTiles;
-		// int c = rc % numHorizontalTiles;
-		// return tiles[r][c].getType();
-		
-		if(blockMapExist(row, col))
-			return Tile.BLOCKED;
-		else return Tile.NORMAL;
+		try {
+			if(blockMapExist(row, col))
+				return Tile.BLOCKED;
+			
+			//function block
+			else if(functionBlockMapExist(row, col)) {
+				if(functionBlockMap[row][col] == 24171) { // normal coin
+					return Tile.COIN;
+				}
+				else if(functionBlockMap[row][col] == 24329 || functionBlockMap[row][col] == 24330 ||
+						functionBlockMap[row][col] == 24331 || functionBlockMap[row][col] == 24332 ||
+						functionBlockMap[row][col] == 24383 || functionBlockMap[row][col] == 24384 ||
+						functionBlockMap[row][col] == 24385 || functionBlockMap[row][col] == 24386 ||
+						functionBlockMap[row][col] == 24437 || functionBlockMap[row][col] == 24438 ||
+						functionBlockMap[row][col] == 24439 || functionBlockMap[row][col] == 24440) { // vine
+					return Tile.VINE;
+				}
+			}
+			
+			//hazard block
+			else if(hazardBlockMapExist(row, col)) {
+				if(hazardBlockMap[row][col] == 24283 || hazardBlockMap[row][col] == 24392 || hazardBlockMap[row][col] == 24582) { // water
+					return Tile.WATER;
+				}
+				else if(hazardBlockMap[row][col] == 24529) { // dirty water
+					return Tile.DIRTY_WATER;
+				}
+				else if(hazardBlockMap[row][col] == 24545) { // lava
+					return Tile.LAVA;
+				}
+				else if(hazardBlockMap[row][col] == 24665) { // spike
+					return Tile.SPIKE;
+				}
+			}
+			else if(transparentBlockMapExist(row, col)) {
+				return Tile.TRANSPARENT;
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+			return Tile.NORMAL;
+		}
+		return Tile.NORMAL;
 	}
 	
 	public void setPosition(double x, double y){
-
+		
 		
 		this.x += (x - this.x) * tween;
 		this.y += (y - this.y) * tween;
@@ -248,33 +272,111 @@ public class TileMap {
 	}
 	
 	
-	public void draw(Graphics2D g) {
+	
+	public int[][] getHazardBlockMap() {
+		return hazardBlockMap;
+	}
+
+
+	public void setHazardBlockMap(int row, int col, int value) {
+		hazardBlockMap[row][col] = value;
+	}
+
+	public void setTransparentBlockMap(int row, int col, int value) {
+		transparentBlockMap[row][col] = value;
+	}
+
+	public void setFunctionBlockMap(int row, int col, int value) {
+		functionBlockMap[row][col] = value;
+	}
+
+	public void setBackgroundItemMap(int row, int col, int value) {
+		backgroundItemMap[row][col] = value;
+	}
+	
+	// let map shaking
+	public void setShake(int shakeSize) {
+		
+		if(isShaking()) {
+			random = new Random();
+			randomShakeX = (random.nextDouble()*2 - 1)*shakeSize;
+			randomShakeY = (random.nextDouble()*2 - 1)*shakeSize;
+		}
+		else {
+			randomShakeX = 0;
+			randomShakeY = 0;
+		}
+		setPosition(this.x + randomShakeX, this.y + randomShakeY);
+		
+	}
+
+
+	public void explosion(int row, int col) {
+		
+		for(int i = (row - 1); i <= (row + 1); i++) {
+			for(int j = (col - 1); j <= (col + 1); j++) {
+				setFunctionBlockMap(i, j, 0);
+			}
+		}
+	}
+	
+	
+	
+	// draw blocks except for transparentBlocks
+	public void draw(Graphics2D g, int levelTileY, int levelTileHeight) {
 		for(
 			int row = rowOffset;
 			row < rowOffset + numRowsToDraw;
 			row++){
 			
-			if(row >= numRows) break;
+			if (row >= numRows || row >= (levelTileY + levelTileHeight)) break;
+			if (row < levelTileY) continue;
 			
 			for(
 				int col = colOffset;
 				col < colOffset + numColsToDraw;
 				col++) {
 				
-				if(col > numCols) break;
+				if(col >= numCols) break;
 				
 				drawBackgroundItems(row, col, g);
 				drawBlocks(row, col, g);
 				drawFunctionBlocks(row, col, g);
 				drawHazardBlocks(row, col, g);
-				drawTransparentBlocks(row, col, g);
+
 				
 			}
 				
 		}
 	}
 	
-	
+	public void drawTransparentBlocks(Graphics2D g, int levelTileY, int levelTileHeight) {
+		for(
+				int row = rowOffset;
+				row < rowOffset + numRowsToDraw;
+				row++){
+				
+				if (row >= numRows || row >= (levelTileY + levelTileHeight)) break;
+				if (row < levelTileY) continue;
+				
+				for(
+					int col = colOffset;
+					col < colOffset + numColsToDraw;
+					col++) {
+					
+					if(col >= numCols) break;
+					
+					for(int i = 0; i < transparentTile.length; i++)
+						if(row == transparentTile[i][0] && col == transparentTile[i][1]) {
+							g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+							break;
+						}
+					drawTransparentBlocks(row, col, g);
+					g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
+				}
+					
+			}
+	}
 	
 	private void drawBackgroundItems(int row, int col, Graphics2D g) {
 		if(backgroundItemMapExist(row, col)) {
@@ -291,11 +393,6 @@ public class TileMap {
 		if(blockMapExist(row, col)) {
 			
 			Tile subT = getTile(blockMap, row, col);
-			
-			
-			int horizontal = TilesSheet.get(0).length;
-			int tRow = ((blockMap[row][col] - jsonFirstIDList.get(2)) / horizontal);
-			int tCol = ((blockMap[row][col] - jsonFirstIDList.get(2)) % horizontal);
 			
 			g.drawImage(
 					subT.getImage(),
@@ -376,6 +473,15 @@ public class TileMap {
 		return tileset[tRow][tCol];
 	}
 	
+	
+	// given row and column, return the tile can climb or not
+	public boolean isClimbable(int row, int col) {
+		if (getType(row, col) == Tile.VINE) { // vine tile
+			return true;
+		}
+		else return false;
+	}
+	
 		
 	/* check all object is exist */
 	private boolean blockMapExist(int row, int col) {
@@ -393,5 +499,30 @@ public class TileMap {
 	}
 	private boolean functionBlockMapExist(int row, int col) {
 		return (functionBlockMap[row][col] > 0);
+	}
+	
+	
+	public void setTransparent(int x, int y) {
+		int tileCol = x/tileSize;
+		int tileRow = y/tileSize;
+		if(x == -1 && y == -1) { 
+			for(int i = 0; i < transparentTile.length; i++) {
+				transparentTile[i][0] = 0;
+				transparentTile[i][1] = 0;
+			}
+			return;
+		}
+		for(int i = 0; i < transparentTile.length; i++) {
+			
+			if(i / 3 == 0) transparentTile[i][0] = tileRow-1;
+			else if(i / 3 == 1) transparentTile[i][0] = tileRow;
+			else if(i / 3 == 2) transparentTile[i][0] = tileRow+1;
+			
+			if(i % 3 == 0) transparentTile[i][1] = tileCol-1;
+			else if(i % 3 == 1) transparentTile[i][1] = tileCol;
+			else if(i % 3 == 2) transparentTile[i][1] = tileCol+1;
+			
+		}
+		
 	}
 }

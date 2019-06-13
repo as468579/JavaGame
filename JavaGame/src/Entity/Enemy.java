@@ -7,6 +7,7 @@ public abstract class Enemy extends MapObject{
 	protected int health;
 	protected int maxHealth;
 	protected boolean dead;
+	protected boolean remove;
 	protected int damage;
 	
 	protected boolean flinching;
@@ -17,10 +18,13 @@ public abstract class Enemy extends MapObject{
 	}
 	
 	public boolean isDead() { return dead; }
+	
+	public boolean shouldRemove() { return remove; };
 
 	public int getDamage() { return damage; }
 
 	public void hit(int damage) {
+
 		if(dead || flinching) return;
 		health -= damage;
 		if(health < 0) health = 0;

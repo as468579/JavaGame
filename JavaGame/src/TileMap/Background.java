@@ -33,7 +33,8 @@ public class Background {
 	
 	public void setPosition(double x, double y){
 		this.x = (x * moveScale) % GamePanel.WIDTH;
-		this.y = (y * moveScale) % GamePanel.HEIGHT;
+		//this.y = (y * moveScale) % GamePanel.HEIGHT;
+		this.y = 0;
 	}
 	
 	public void setVector(double dx, double dy){
@@ -47,11 +48,8 @@ public class Background {
 	}
 	
 	public void draw(Graphics2D g){
-		if(x < GamePanel.WIDTH * -1)
-		{
-			x = 0;
-		}
-		
+		x = x % GamePanel.WIDTH;  // let x always >= 0
+		y = y % GamePanel.HEIGHT; // let y always >= 0
 		g.drawImage(
 				image, 
 				(int)x, 
@@ -59,8 +57,34 @@ public class Background {
 				GamePanel.WIDTH, 
 				GamePanel.HEIGHT, 
 				null);
-		
-		if(x < 0){
+		if(x == 0) {
+			// y == 0 image has already drawn
+			
+			// draw x == 0 y < 0
+			if(y < 0) {
+				g.drawImage(
+						image, 
+						(int)x, 
+						(int)y + GamePanel.HEIGHT, 
+						GamePanel.WIDTH, 
+						GamePanel.HEIGHT, 
+						null);
+			}
+			
+			// draw x == 0 y > 0
+			else if(y > 0) {
+				g.drawImage(
+						image, 
+						(int)x, 
+						(int)y - GamePanel.HEIGHT, 
+						GamePanel.WIDTH, 
+						GamePanel.HEIGHT, 
+						null);
+			}
+		}
+		else if(x < 0) {
+			
+			// draw x < 0, y == 0
 			g.drawImage(
 					image,
 					(int)x + GamePanel.WIDTH,
@@ -70,8 +94,50 @@ public class Background {
 					null
 			);
 			
+			// draw x < 0, y < 0
+			if(y < 0) {
+				g.drawImage(
+						image,
+						(int)x,
+						(int)y + GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);
+				g.drawImage(
+						image,
+						(int)x + GamePanel.WIDTH,
+						(int)y + GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);
+			}
+			
+			// draw x < 0, y > 0
+			else if(y > 0) {
+				g.drawImage(
+						image,
+						(int)x,
+						(int)y - GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);
+				g.drawImage(
+						image,
+						(int)x + GamePanel.WIDTH,
+						(int)y - GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);
+			}
+			
 		}
-		if(x > 0){
+		else if(x > 0){
+			
+			// draw x < 0, y == 0
 			g.drawImage(
 					image,
 					(int)x - GamePanel.WIDTH,
@@ -80,6 +146,46 @@ public class Background {
 					GamePanel.HEIGHT,
 					null
 			);
+			
+			// draw x < 0, y > 0
+			if(y > 0) {
+				g.drawImage(
+						image,
+						(int)x - GamePanel.WIDTH,
+						(int)y - GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);
+				g.drawImage(
+						image,
+						(int)x,
+						(int)y - GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);
+			}
+			
+			// draw x < 0, y < 0
+			else if(y < 0) {
+				g.drawImage(
+						image,
+						(int)x - GamePanel.WIDTH,
+						(int)y + GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);
+				g.drawImage(
+						image,
+						(int)x,
+						(int)y + GamePanel.HEIGHT,
+						GamePanel.WIDTH,
+						GamePanel.HEIGHT,
+						null
+				);				
+			}
 		}
 		
 		

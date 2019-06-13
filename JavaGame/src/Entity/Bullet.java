@@ -8,18 +8,16 @@ import javax.imageio.ImageIO;
 import GameState.LoadState;
 import TileMap.TileMap;
 
-public class FireBall extends MapObject{
+public class Bullet extends MapObject{
 	
 	private boolean hit;
 	private boolean remove;
 	private BufferedImage[] sprites;
-	private BufferedImage[] hitSprites;
 	private boolean used;
 	
 	private static final int SHOOTING = 0;
-	private static final int HITTING = 1;
 
-	public FireBall(TileMap tm, boolean right) {
+	public Bullet(TileMap tm, boolean right) {
 		super(tm);
 		
 		moveSpeed = 3.8;
@@ -28,27 +26,24 @@ public class FireBall extends MapObject{
 		
 		facingRight = right;
 		
-		width = 30;
-		height = 30;
+		width = 20;
+		height = 8;
 		cwidth = 14;
 		cheight = 14;
 		
 
 		
 		// load sprites
-		sprites = LoadState.Fireball[SHOOTING];
-		hitSprites = LoadState.Fireball[HITTING];
+		sprites = LoadState.Bullet[SHOOTING];
 		
 		animation = new Animation();
 		animation.setFrames(sprites);
-		animation.setDelay(30);
+		animation.setDelay(-1);
 	}
 	
 	public void setHit() {
 		if(hit) return;
 		hit = true;
-		animation.setFrames(hitSprites);
-		animation.setDelay(70);
 		dx = 0;  // when hit enemy dx should set to 0  
 	}
 	
@@ -61,6 +56,8 @@ public class FireBall extends MapObject{
 		checkTileMapCollision();
 		setPosition(xtemp,ytemp);
 		
+		
+		// embeded in the wall 
 		if(dx == 0 && !hit) {
 			setHit();
 		}
