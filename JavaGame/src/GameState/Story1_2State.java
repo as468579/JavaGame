@@ -14,9 +14,9 @@ import java.util.ArrayList;
 
 import Entity.Enemy;
 import Entity.Explosion;
+import Entity.NPC;
 import Entity.Player;
 import Entity.PlayerSave;
-import Entity.Enemies.NPC;
 import Main.GamePanel;
 import TileMap.Background;
 import TileMap.TileMap;
@@ -58,22 +58,16 @@ public class Story1_2State extends LevelState{
 	}
 	
 	private void populateNPC() {
-		
-		enemies = new ArrayList<Enemy>();
-		enemies.clear();
-		
-		Point[] posNpc = new Point[] { new Point(2600, 300), };
-		
-		for(int i = 0; i < posNpc.length; i++) {
-			npc = new NPC(tileMap);
-			npc.setPosition(posNpc[i].x, posNpc[i].y);
-			enemies.add(npc);
-		}
+		npc = new NPC(tileMap);
+		npc.setPosition(2600, 300);
 	}
 	
 	@Override
 	public void update() {
 		player.update();
+		
+		// update NPC 
+		npc.update();
 		tileMap.setPosition(
 				GamePanel.WIDTH / 2 - player.getX(),
 				GamePanel.HEIGHT / 2 - player.getY()
@@ -81,9 +75,6 @@ public class Story1_2State extends LevelState{
 		bg.setPosition(tileMap.getX(), tileMap.getY());
 		
 		autoMove();
-		for(int i = 0; i < enemies.size(); i++) {
-			enemies.get(i).update();
-		}
 		
 		
 		if(player.getY() > (levelTileY + levelTileHeight)*16 ) {
@@ -111,10 +102,9 @@ public class Story1_2State extends LevelState{
 		tileMap.draw(g, levelTileY, levelTileHeight);
 		player.draw(g);
 		
-		// draw enemies
-		for(int i = 0; i < enemies.size(); i++) {
-			enemies.get(i).draw(g);		
-		}
+		// draw NPC
+		npc.draw(g);
+		
 		
 		tileMap.drawTransparentBlocks(g, levelTileY, levelTileHeight);
 		
@@ -246,7 +236,7 @@ public class Story1_2State extends LevelState{
 			
 		}
 		if(storyPart[5]) {
-			npc.setScratching(true);
+			npc.setScratching();
 			player.hit(0);
 			player.setRight(false);
 			if(player.getX() >= 2420) {

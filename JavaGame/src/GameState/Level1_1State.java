@@ -19,7 +19,6 @@ import Entity.Enemies.Alligator;
 import Entity.Enemies.Bat;
 import Entity.Enemies.DarkKnight;
 import Entity.Enemies.IronCannon;
-import Entity.Enemies.NPC;
 import Entity.Enemies.Slugger;
 import Entity.Enemies.Snake;
 import Entity.Items.Bomb;
