@@ -77,9 +77,9 @@ public class NPC extends MapObject{
 		cwidth = 20;
 		cheight = 20;
 		
-		moveSpeed = 0.3;
+		moveSpeed = 0.7;
 		//maxSpeed = 1.6;
-		maxSpeed = 3.6;
+		maxSpeed = 5.0;
 		stopSpeed = 0.4;
 		fallSpeed = 0.15;
 		maxFallSpeed = 4.0;
@@ -522,7 +522,7 @@ public class NPC extends MapObject{
 		}
 		
 		// draw scratch box
-		drawScratchBox(g);
+//		drawScratchBox(g);
 		super.draw(g);
 	}
 	
