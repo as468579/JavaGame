@@ -3,7 +3,7 @@
 ## Menu
 ![Menu](https://github.com/as468579/JavaGame/blob/master/menu.gif)
 
-## Playing Scenarios
+## Play Scenarios
 ![Play](https://github.com/as468579/JavaGame/blob/master/playing.gif)
 
 ## Characters
