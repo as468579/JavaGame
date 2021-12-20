@@ -19,6 +19,8 @@ public class Dialog {
 		private String[] dialog1_2;
 		private String[] dialog1_2_1;
 		private String[] dialog1_3;
+		private String[] dialog1_3_1;
+		private String[] dialog1_3_2;
 		private String[] dialog1_4;
 		private String[] dialog1_4_1;
 		private String[] dialog1_5;
@@ -68,7 +70,7 @@ public class Dialog {
 				
 				g.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 11));
 				g.setColor(new Color(0,0,0));
-				g.drawString("<SPACE>", GamePanel.WIDTH-55, GamePanel.HEIGHT-10);
+				g.drawString("<Press X >", GamePanel.WIDTH-70, GamePanel.HEIGHT-10);
 			}
 			
 		}
@@ -117,6 +119,10 @@ public class Dialog {
 		public String[] getDialog1_2_1() { return dialog1_2_1; }
 
 		public String[] getDialog1_3() { return dialog1_3; }
+		
+		public String[] getDialog1_3_1() { return dialog1_3_1; }
+		
+		public String[] getDialog1_3_2() { return dialog1_3_2; }
 
 		public String[] getDialog1_4() { return dialog1_4; }
 		
@@ -138,6 +144,10 @@ public class Dialog {
 		public void setDialog1_2_1(String[] dialog1_2_1) { this.dialog1_2_1 = dialog1_2_1; }
 
 		public void setDialog1_3(String[] dialog1_3) { this.dialog1_3 = dialog1_3; }
+		
+		public void setDialog1_3_1(String[] dialog1_3_1) { this.dialog1_3_1 = dialog1_3_1; }
+		
+		public void setDialog1_3_2(String[] dialog1_3_2) { this.dialog1_3_2 = dialog1_3_2; }
 
 		public void setDialog1_4(String[] dialog1_4) { this.dialog1_4 = dialog1_4; }
 		
@@ -156,8 +166,8 @@ public class Dialog {
 			dialog1_1 = new String[] {
 					"今天天氣真好",
 					"不知道對方到了沒，趕快去找她\n吧!",
-					" ( ←→ 移動，w 跳躍 ) ",
-					" ( e 滑翔，r、f 可以攻擊) "
+					" ( ←→ 移動，空白鍵跳躍 ) ",
+					" ( w 滑翔，e、r 可以攻擊) "
 			};
 			
 			dialog1_2 = new String[] {
@@ -182,6 +192,20 @@ public class Dialog {
 					"疑?那些藤蔓看起來很堅固",
 					"爬上去應該沒問題",
 					"( 在藤蔓上，↑↓ 可以攀爬 )"
+			};
+			
+			dialog1_3_1 = new String[] {
+					"啊啊啊啊阿", 
+					"前面的這個怪物看起來好強", 
+					"他好像在守著甚麼重要的東西...?"
+			};
+			
+			dialog1_3_2 = new String[] {
+					"是盾牌!!!", 
+					"有了這個就不用擔心怪物的攻擊了", 
+					"(按 f 可以防禦\n"
+					+ "護盾有耐久值，碰到怪物會減少\n"
+					+ "耐久值會慢慢恢復)"
 			};
 			
 			dialog1_4 = new String[] {
@@ -220,7 +244,7 @@ public class Dialog {
 					"!!!!!!",
 					"該不會是啟動了甚麼機關吧...",
 					"不行!要趕快逃出去了",
-					"( 現在按 e 改為飛行，可以\n使用方向鍵控制方向 )"
+					"( 現在按 w 改為飛行，可以\n使用方向鍵控制方向 )"
 			};
 			
 			dialog1_4_1 = new String[] {

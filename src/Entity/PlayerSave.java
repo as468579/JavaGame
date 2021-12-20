@@ -6,10 +6,21 @@ public class PlayerSave {
 	private static int health = 5;
 	private static long time = 0;
 	private static int money = 0;
+	
+	// saved role
+	public static final int HUMAN = 0;
+	public static final int DRAGON = 1;
+	private static int currentRole = 0;
+	
+	// saved items
+	private static boolean shield = false;
 	private static boolean wings = false;
+	
+	// saved position
 	private static double xPos = 100;
 	private static double yPos = 300;
 	
+	// level
 	private static boolean lvl1_1;
 	private static boolean lvl1_2;
 	private static boolean lvl1_3;
@@ -21,10 +32,22 @@ public class PlayerSave {
 	private static boolean flying;
 	
 	public static void init() {
-		//lives = 3;
+
+		// player status
+		// lives = 3;
 		health = 5;
 		time = 0;
+		money = 0;
+
+		// items
+		wings = false;
+		shield = false;
 		
+		// position
+		xPos = 100;
+		yPos = 300;
+		
+		// level
 		lvl1_1 = false;
 		lvl1_2 = false;
 		lvl1_3 = false;
@@ -50,12 +73,17 @@ public class PlayerSave {
 	public static boolean hasWings() { return wings; }
 	public static void setWings(boolean w) { wings = w; }
 	
+	public static boolean hasShield() { return shield; }
+	public static void setShield(boolean b) { shield = b; }
 	
 	public static double getX() { return xPos; }
 	public static void setX(double x) { xPos = x; }
 	
 	public static double getY() { return yPos; }
 	public static void setY(double y) { yPos = y; }
+
+	public static int getCurrentRole() { return currentRole; }
+	public static void setCurrentRole(int i) { currentRole = i; }
 
 	public static boolean enteredLvl1_1() {
 		return lvl1_1;

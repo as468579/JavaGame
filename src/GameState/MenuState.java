@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 
 import Audio.AudioPlayer;
+import Entity.PlayerSave;
 import TileMap.Background;
 
 public class MenuState extends GameState{
@@ -14,7 +15,7 @@ public class MenuState extends GameState{
 	private int currentChoice = 0;
 	private String[] options = {
 		"Start",
-		"Help",
+		"Setting",
 		"Quit"
 	};
 	private Color titleColor;
@@ -52,8 +53,10 @@ public class MenuState extends GameState{
 
 	@Override
 	public void init() {
-		bgMusic = new AudioPlayer("/Music/MenuMusic.mp3");
-		bgMusic.play();
+		//bgMusic = new AudioPlayer("/Music/MenuMusic.mp3");
+		AudioPlayer.load("/Music/menuMusic.mp3", "menu", AudioPlayer.BGMUSIC);
+		AudioPlayer.setVolume();
+		AudioPlayer.loop("menu", AudioPlayer.BGMUSIC);
 	}
 
 	@Override
@@ -77,22 +80,27 @@ public class MenuState extends GameState{
 		
 		for(int i = 0; i < options.length; i++){
 			if(i == currentChoice){
-				g.setColor(Color.BLACK);
-			}
-			else{
 				g.setColor(Color.RED);
 			}
-			g.drawString(options[i], 145, 140 + i * 20);
+			else{
+				g.setColor(Color.BLACK);
+			}
+			g.drawString(options[i], 130, 140 + i * 20);
 		}
 	}
 	
 	private void select(){
 		if(currentChoice == 0){
-			// load image 
-			gsm.setStates(GameStateManager.STORY1_1STATE);
+			
+			if(PlayerSave.getCurrentRole() == PlayerSave.DRAGON) { //dragon type
+				gsm.setStates(GameStateManager.STORY1_1_2STATE);
+			}
+			else if(PlayerSave.getCurrentRole() == PlayerSave.HUMAN) { // human type
+				gsm.setStates(GameStateManager.STORY1_1_1STATE);
+			}
 		}
 		else if(currentChoice == 1){
-			// help
+			gsm.setStates(GameStateManager.SETTINGSTATE);
 		}
 		else if(currentChoice == 2){
 			System.exit(0);
@@ -101,9 +109,14 @@ public class MenuState extends GameState{
 
 	@Override
 	public void keyPressed(int k) {
+
+	}
+
+	@Override
+	public void keyReleased(int k) {
 		if(k == KeyEvent.VK_ENTER){
 			select();
-			bgMusic.close();
+			AudioPlayer.close("menu", AudioPlayer.BGMUSIC);
 		}
 		else if(k == KeyEvent.VK_UP){
 			currentChoice--;
@@ -119,12 +132,6 @@ public class MenuState extends GameState{
 				currentChoice = 0;
 			}
 		}
-	}
-
-	@Override
-	public void keyReleased(int k) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }

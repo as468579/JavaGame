@@ -5,17 +5,20 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
 import Audio.AudioPlayer;
 import Entity.Dialog;
-import Entity.Enemy;
 import Entity.Explosion;
-import Entity.Item;
 import Entity.PlayerSave;
-import Entity.Enemies.Alligator;
-import Entity.Enemies.Slugger;
-import Entity.Enemies.Snake;
-import Entity.Items.Bomb;
-import Entity.Items.Treasurebox;
+import Entity.Title;
+import Entity.Object.Enemies.Alligator;
+import Entity.Object.Enemies.Slugger;
+import Entity.Object.Enemies.Snake;
+import Entity.Object.Items.Bomb;
+import Entity.Object.Items.Treasurebox;
+import Entity.Object.Enemy;
+import Entity.Object.Item;
 import Main.GamePanel;
 import TileMap.Background;
 
@@ -37,7 +40,9 @@ public class Level1_7State extends LevelState {
 		bg = new Background("/Backgrounds/background_1_7.gif", 0.5);
 
 		// background music
-		bgMusic = new AudioPlayer("/Music/Level1Music.mp3");
+		levelName = "level7";
+		AudioPlayer.load("/Music/level7Music.mp3", levelName, AudioPlayer.BGMUSIC);
+		AudioPlayer.setVolume();
 		
 		dialogFrame = new Dialog();
 		
@@ -48,9 +53,19 @@ public class Level1_7State extends LevelState {
 		populateEnemies();
 		populateItems();
 		
+		// load subtitle
+		try {
+			subtitleImg = ImageIO.read(
+				getClass().getResourceAsStream("/HUD/level7.png")
+			);
+			subtitle = new Title(subtitleImg);
+			subtitle.setY(85);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 		shakeSize = 0;
-		
-		
+
 		//check player is flying up
 		if(PlayerSave.isFlying()) player.setPosition(2720, 3200); 
 	}
@@ -67,6 +82,7 @@ public class Level1_7State extends LevelState {
 
 		if (player.getY() > (levelTileY + levelTileHeight) * 16) {
 			PlayerSave.setLvl1_7(true);
+			tileMap.setShaking(false);
 			// eventFinish
 			eventFinish(GameStateManager.ENDING_STATE_2);
 		}
@@ -74,6 +90,7 @@ public class Level1_7State extends LevelState {
 	
 	public void reset() {
 
+		//TODO
 		player.setPosition(2720, 3200); 
 
 		if(true)populateEnemies();

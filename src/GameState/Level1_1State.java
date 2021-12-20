@@ -8,22 +8,30 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
+
 import Audio.AudioPlayer;
 import Entity.Dialog;
-import Entity.Enemy;
 import Entity.Explosion;
-import Entity.Item;
-import Entity.Player;
 import Entity.PlayerSave;
-import Entity.Enemies.Alligator;
-import Entity.Enemies.Bat;
-import Entity.Enemies.DarkKnight;
-import Entity.Enemies.IronCannon;
-import Entity.Enemies.Slugger;
-import Entity.Enemies.Snake;
-import Entity.Items.Bomb;
-import Entity.Items.Coin;
-import Entity.Items.Treasurebox;
+import Entity.Title;
+import Entity.Object.Enemies.Alligator;
+import Entity.Object.Enemies.Bat;
+import Entity.Object.Enemies.DarkKnight;
+import Entity.Object.Enemies.IronCannon;
+import Entity.Object.Enemies.Slugger;
+import Entity.Object.Enemies.Snake;
+import Entity.Object.Enemies.Thief;
+import Entity.Object.Items.Bomb;
+import Entity.Object.Items.Coin;
+import Entity.Object.Items.Shield;
+import Entity.Object.Items.Treasurebox;
+import Entity.Object.Items.Wings;
+import Entity.Object.Enemy;
+import Entity.Object.Item;
+import Entity.Object.NPC;
+import Entity.Object.Player;
+import Entity.Object.Tornado;
 import TileMap.Background;
 
 public class Level1_1State extends LevelState {
@@ -48,8 +56,11 @@ public class Level1_1State extends LevelState {
 		bg = new Background("/Backgrounds/background_1_1.gif", 0.5);
 		
 		// background music
-		bgMusic = new AudioPlayer("/Music/Level1Music.mp3");
-				
+		levelName = "level1";
+		AudioPlayer.load("/Music/level1Music.mp3", levelName, AudioPlayer.BGMUSIC);
+		AudioPlayer.setVolume();
+		
+		// dialog
 		dialogFrame = new Dialog();
 				
 		enemies = new ArrayList<Enemy>();
@@ -60,12 +71,22 @@ public class Level1_1State extends LevelState {
 		populateItems();
 		populateStory();
 		
+		// load subtitle
+		try {
+			subtitleImg = ImageIO.read(
+				getClass().getResourceAsStream("/HUD/level1.png")
+			);
+			subtitle = new Title(subtitleImg);
+			subtitle.setY(85);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 		currentDialog = 0;
 		
 		shakeSize = 30;
 		
 		//TODO
-//		player.setMoney(19999);
 //		player.setWings(true);
 	}
 
@@ -77,6 +98,9 @@ public class Level1_1State extends LevelState {
 		Slugger sl;
 		Alligator a;
 		Snake sn;
+		DarkKnight dk;
+		Bat b;
+		Thief t;
 		
 		Point[] posSnake = new Point[] {};
 		Point[] posAlligator = new Point[] {};
@@ -84,7 +108,14 @@ public class Level1_1State extends LevelState {
 
  		if(tileMap == null) System.exit(0);
  		
-		//setFocus(b);
+ 		// test
+ 		t = new Thief(tileMap);
+		t.setPosition(200,350);
+		enemies.add(t);
+ 		
+ 		
+
+		// setFocus(t);
 		
 		for (int i = 0; i < posSnake.length; i++) {
 			sn = new Snake(tileMap);
@@ -111,7 +142,17 @@ public class Level1_1State extends LevelState {
 		Treasurebox tr;
 		Bomb b;
 		Coin c;
-
+		Wings w;
+		Shield sh;
+		
+		w = new Wings(tileMap);
+ 		w.setPosition(200,350);
+		items.add(w);
+		
+		sh = new Shield(tileMap);
+		sh.setPosition(200,350);
+		items.add(sh);
+		
 		Point[] posCoin = new Point[] { new Point(1625, 275), };
 		Point[] posBomb = new Point[] {};
 		Point[] posTreasure = new Point[] {new Point(2450, 35), };
@@ -145,8 +186,8 @@ public class Level1_1State extends LevelState {
 
 		// story check
 		if (story.contains(player.getX(), player.getY())) { // enter story 2
-			dialogFrame.setDialog1_1(new String[] {});
 			PlayerSave.setLvl1_1(true);
+			
 			// eventFinish
 			eventFinish(GameStateManager.STORY1_2STATE);
 		}
@@ -154,6 +195,7 @@ public class Level1_1State extends LevelState {
 		// position check
 		if (player.getY() > (levelTileY + levelTileHeight) * 16) {
 			PlayerSave.setLvl1_1(true);
+			
 			// eventFinish
 			eventFinish(GameStateManager.LEVEL1_2STATE);
 		}
@@ -179,6 +221,7 @@ public class Level1_1State extends LevelState {
 		if(!PlayerSave.enteredLvl1_1()) 
 			story();
 		else {
+			dialogFrame.setDialog1_1(new String[] {});
 			dialogFrame.end();
 		}
 		
@@ -201,7 +244,7 @@ public class Level1_1State extends LevelState {
 	@Override
 	public void keyPressed(int k) {
 		super.keyPressed(k);
-		if( k == KeyEvent.VK_SPACE) {
+		if( k == KeyEvent.VK_X) {
 			currentDialog++;
 		}
 	}

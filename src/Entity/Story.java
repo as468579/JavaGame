@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
+import Entity.Object.Player;
+
 public class Story {
 
 		private Player player;
@@ -19,10 +21,10 @@ public class Story {
 			content = "";
 			try {
 				imagePlayer = ImageIO.read(
-						getClass().getResourceAsStream(
-							"/HUD/player.jpg"
-						)
-					);
+									getClass().getResourceAsStream(
+										"/HUD/player.jpg"
+									)
+							);
 			}
 			catch(Exception e) {
 				e.printStackTrace();

@@ -3,13 +3,14 @@ package GameState;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
+import Audio.AudioPlayer;
 import Main.GamePanel;
 
 public class GameStateManager {
 	private GameState[] gameStates;
 	private int currentState;
 	
-	public static final int NUMGAMESTATES = 14;
+	public static final int NUMGAMESTATES = 16;
 	public static final int LOADSTATE = 0;
 	public static final int MENUSTATE = 1;
 	public static final int LEVEL1_1STATE = 2;
@@ -19,14 +20,18 @@ public class GameStateManager {
 	public static final int LEVEL1_5STATE = 6;
 	public static final int LEVEL1_6STATE = 7;
 	public static final int LEVEL1_7STATE = 8;
-	public static final int STORY1_1STATE = 9;
-	public static final int STORY1_2STATE = 10;
-	public static final int ENDING_STATE_1 = 11;
-	public static final int ENDING_STATE_2 = 12;
-	public static final int ENDING_STATE_3 = 13;
+	public static final int STORY1_1_1STATE = 9;
+	public static final int STORY1_1_2STATE = 10;
+	public static final int STORY1_2STATE = 11;
+	public static final int ENDING_STATE_1 = 12;
+	public static final int ENDING_STATE_2 = 13;
+	public static final int ENDING_STATE_3 = 14;
+	public static final int SETTINGSTATE = 15;
 
 	
 	public GameStateManager(){
+		
+		AudioPlayer.init();
 		
 		gameStates = new GameState[NUMGAMESTATES];
 		
@@ -63,8 +68,11 @@ public class GameStateManager {
 		else if(state == LEVEL1_7STATE) {
 			gameStates[state] = new Level1_7State(this);
 		}
-		else if(state == STORY1_1STATE) {
-			gameStates[state] = new  Story1_1State(this);
+		else if(state == STORY1_1_1STATE) {
+			gameStates[state] = new  Story1_1_1State(this);
+		}
+		else if(state == STORY1_1_2STATE) {
+			gameStates[state] = new  Story1_1_2State(this);
 		}
 		else if(state == STORY1_2STATE) {
 			gameStates[state] = new  Story1_2State(this);
@@ -77,6 +85,9 @@ public class GameStateManager {
 		}
 		else if(state == ENDING_STATE_3) {
 			gameStates[state] = new  Ending3State(this);
+		}
+		else if(state == SETTINGSTATE) {
+			gameStates[state] = new  SettingState(this);
 		}
 	}
 	

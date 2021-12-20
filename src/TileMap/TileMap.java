@@ -15,6 +15,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import Audio.AudioPlayer;
 import Main.GamePanel;
 
 public class TileMap {
@@ -117,7 +118,11 @@ public class TileMap {
 		try {
 			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!<
 			JSONParser parser = new JSONParser();
-			Object obj = parser.parse(new FileReader(path));
+			Object obj = parser.parse(
+				new FileReader(
+					path
+				)
+			);
 			JSONObject jObj = (JSONObject) obj;
 			
 			JSONArray layers = (JSONArray) jObj.get("layers"); //get json file's data that name is 'layers'

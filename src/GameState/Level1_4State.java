@@ -8,18 +8,21 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
 import Audio.AudioPlayer;
 import Entity.Dialog;
-import Entity.Enemy;
 import Entity.Explosion;
-import Entity.Item;
 import Entity.PlayerSave;
-import Entity.Enemies.Alligator;
-import Entity.Enemies.Slugger;
-import Entity.Enemies.Snake;
-import Entity.Items.Bomb;
-import Entity.Items.Coin;
-import Entity.Items.Treasurebox;
+import Entity.Title;
+import Entity.Object.Enemies.Alligator;
+import Entity.Object.Enemies.Slugger;
+import Entity.Object.Enemies.Snake;
+import Entity.Object.Items.Bomb;
+import Entity.Object.Items.Coin;
+import Entity.Object.Items.Treasurebox;
+import Entity.Object.Enemy;
+import Entity.Object.Item;
 import Main.GamePanel;
 import TileMap.Background;
 
@@ -42,7 +45,9 @@ public class Level1_4State extends LevelState {
 		bg = new Background("/Backgrounds/background_1_4.gif", 0.5);
 		
 		// background music
-		bgMusic = new AudioPlayer("/Music/Level1Music.mp3");
+		levelName = "level4";
+		AudioPlayer.load("/Music/level4Music.mp3", levelName, AudioPlayer.BGMUSIC);
+		AudioPlayer.setVolume();
 		
 		dialogFrame = new Dialog();
 	
@@ -52,6 +57,17 @@ public class Level1_4State extends LevelState {
 		
 		populateEnemies();
 		populateItems();
+		
+		// load subtitle
+		try {
+			subtitleImg = ImageIO.read(
+				getClass().getResourceAsStream("/HUD/level4.png")
+			);
+			subtitle = new Title(subtitleImg);
+			subtitle.setY(85);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 		currentDialog = 0;
 		currentDialog2 = 0;
@@ -127,7 +143,6 @@ public class Level1_4State extends LevelState {
 		super.update();
 
 		if (player.getY() < (levelTileY-1) * 16) {
-			dialogFrame.setDialog1_4(new String[] {});
 			PlayerSave.setLvl1_4(true);
 			// eventFinish
 			eventFinish(GameStateManager.LEVEL1_3STATE);
@@ -135,6 +150,7 @@ public class Level1_4State extends LevelState {
 
 		if (player.getY() > (levelTileY + levelTileHeight) * 16) {
 			PlayerSave.setLvl1_4(true);
+			
 			// eventFinish
 			eventFinish(GameStateManager.LEVEL1_5STATE);
 		}
@@ -155,14 +171,13 @@ public class Level1_4State extends LevelState {
 		super.draw(g);
 		
 		//run dialog
-		if(!PlayerSave.enteredLvl1_4()) {
-			if(!tileMap.isShaking()) story();
-			else storyEscape();
-		}
+		if(!PlayerSave.enteredLvl1_4())
+			story();
 		else {
+			dialogFrame.setDialog1_4(new String[] {});
+			dialogFrame.setDialog1_4_1(new String[] {});
 			dialogFrame.end();
 		}
-		
 		
 	}
 	
@@ -207,10 +222,10 @@ public class Level1_4State extends LevelState {
 	@Override
 	public void keyPressed(int k) {
 		super.keyPressed(k);
-		if( k == KeyEvent.VK_SPACE) {
+		if( k == KeyEvent.VK_X) {
 			currentDialog++;
 		}
-		if( tileMap.isShaking() && k == KeyEvent.VK_SPACE) {
+		if( tileMap.isShaking() && k == KeyEvent.VK_X) {
 			currentDialog2++;
 		}
 	}

@@ -8,21 +8,22 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import Entity.Enemy;
 import Entity.Explosion;
 import Entity.HUD;
-import Entity.Item;
 import Entity.MapObject;
-import Entity.Player;
 import Entity.PlayerSave;
 import Entity.Title;
 import Entity.Dialog;
-import Entity.Enemies.Alligator;
-import Entity.Enemies.DarkKnight;
-import Entity.Enemies.Slugger;
-import Entity.Enemies.Snake;
-import Entity.Items.Bomb;
-import Entity.Items.Treasurebox;
+import Entity.Object.Enemies.Alligator;
+import Entity.Object.Enemies.DarkKnight;
+import Entity.Object.Enemies.Slugger;
+import Entity.Object.Enemies.Snake;
+import Entity.Object.Enemies.Thief;
+import Entity.Object.Items.Bomb;
+import Entity.Object.Items.Treasurebox;
+import Entity.Object.Enemy;
+import Entity.Object.Item;
+import Entity.Object.Player;
 import Main.GamePanel;
 import TileMap.*;
 import java.awt.event.KeyEvent;
@@ -46,10 +47,6 @@ public abstract class LevelState extends GameState{
 	protected ArrayList<Explosion> explosions;//
 	protected ArrayList<Item> items;//
 	
-	
-	protected AudioPlayer bgMusic;
-	private AudioPlayer scream;
-	
 	protected int levelTileY;
 	protected int levelTileHeight;
 	
@@ -72,15 +69,17 @@ public abstract class LevelState extends GameState{
 	
 	// title
 	private Title title;
-	private Title subtitle;
+	protected Title subtitle;
 	private BufferedImage titleImg;
-	private BufferedImage subtitleImg;
+	protected BufferedImage subtitleImg;
 	
 	//map shaking
 	protected int shakeSize = 0;
 	
 	// main role
 	protected MapObject mainRole;
+	
+	protected String levelName;
 	
 	
 	public LevelState(GameStateManager gsm){
@@ -99,6 +98,7 @@ public abstract class LevelState extends GameState{
 		player.setHealth(PlayerSave.getHealth());
 		player.setMoney(PlayerSave.getMoney());
 		player.setWings(PlayerSave.hasWings());
+		player.setShield(PlayerSave.hasShield());
 		
 		player.setPosition(PlayerSave.getX(), PlayerSave.getY());
 		// player.setTime(PlayerSave.getTime());
@@ -108,22 +108,15 @@ public abstract class LevelState extends GameState{
 		
 		// hud
 		hud = new HUD(player);
+	
 		
-		// screaming
-		scream = new AudioPlayer("/SFX/dead.mp3");
-		
-		// title and subtitle
+		// load title
 		try {
 			titleImg = ImageIO.read(
 				getClass().getResourceAsStream("/HUD/title.png")
 			);
-			subtitleImg = ImageIO.read(
-				getClass().getResourceAsStream("/HUD/level1.png")
-			);
 			title = new Title(titleImg);
-			subtitle = new Title(subtitleImg);
 			title.setY(60);
-			subtitle.setY(85);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -134,7 +127,6 @@ public abstract class LevelState extends GameState{
 		// event start 
 		eventCount = 0;
 		eventStart = true;
-		
 	}
 
 	public void setFocus(MapObject mo) {
@@ -143,8 +135,6 @@ public abstract class LevelState extends GameState{
 	
 	@Override
 	public void update() {
-		//TODO
-		System.out.println(player.getX()+" "+player.getY());
 		
 		// check if player dead event should start
 		if(player.getHealth() == 0 || player.getY() > tileMap.getHeight()) {
@@ -184,31 +174,15 @@ public abstract class LevelState extends GameState{
 		// chcek items
 		player.checkTouch(items);
 		
-		// update all enemies
+		// update all enemies	
 		for(int i = 0; i < enemies.size(); i++) {
 			Enemy e = enemies.get(i);
 			e.update();
-			/*if(e.isDead()) {
-				
-				// e is boss
-				if(e instanceof DarkKnight) {
-					DarkKnight dk = (DarkKnight)e;
-					if(!dk.shouldRemove()) continue;
-				}
-				
-				// others
-				else {
-					explosions.add(
-						new Explosion(e.getX(),e.getY())
-					);
-				}
-				enemies.remove(i);
-				i--;
-			}*/
 			if(e.shouldRemove()) {
-				if(e instanceof DarkKnight) {
-				}
-				else {
+				if(
+					!(e instanceof DarkKnight) &&
+					!(e instanceof Thief)
+				) {
 					explosions.add(
 							new Explosion(e.getX(),e.getY())
 					);
@@ -243,6 +217,8 @@ public abstract class LevelState extends GameState{
 	
 	@Override
 	public void draw(Graphics2D g) {
+		//TODO
+//		System.out.println("x:"+player.getX()+" y:"+player.getY());
 		
 		//draw background
 		bg.draw(g);
@@ -290,6 +266,7 @@ public abstract class LevelState extends GameState{
 		for(Rectangle r : tb) {
 			g.fill(r);
 		}
+		
 	}
 
 	@Override
@@ -299,12 +276,13 @@ public abstract class LevelState extends GameState{
 			if( k == KeyEvent.VK_RIGHT) player.setRight(true);
 			if( k == KeyEvent.VK_UP) player.setUp(true);
 			if( k == KeyEvent.VK_DOWN) player.setDown(true);
-			if( k == KeyEvent.VK_W) player.setJumping(true);
-			if( k == KeyEvent.VK_E) player.setGliding(true);
-			if( k == KeyEvent.VK_R) player.setScratching();
-			if( k == KeyEvent.VK_F) player.setFiring();
+			if( k == KeyEvent.VK_SPACE) player.setJumping(true);
+			if( k == KeyEvent.VK_W) player.setGliding(true);
+			if( k == KeyEvent.VK_E) player.setScratching();
+			if( k == KeyEvent.VK_R) player.setFiring();
+			if( k == KeyEvent.VK_F) player.setDefending(true);
 			if(k == KeyEvent.VK_ESCAPE) {
-				gsm.setStates(GameStateManager.MENUSTATE);
+				eventFinish(GameStateManager.MENUSTATE);
 			}
 		}
 	}
@@ -316,17 +294,15 @@ public abstract class LevelState extends GameState{
 			if( k == KeyEvent.VK_RIGHT) player.setRight(false);
 			if( k == KeyEvent.VK_UP) player.setUp(false);
 			if( k == KeyEvent.VK_DOWN) player.setDown(false);
-			if( k == KeyEvent.VK_W) player.setJumping(false);
-			if( k == KeyEvent.VK_E) player.setGliding(false);
-			if( k == KeyEvent.VK_R) player.setScratching();
-			if( k == KeyEvent.VK_F) player.setFiring();
+			if( k == KeyEvent.VK_SPACE) player.setJumping(false);
+			if( k == KeyEvent.VK_W) player.setGliding(false);
+			if( k == KeyEvent.VK_F) player.setDefending(false);
 		}
 	}
 	
 	// reset level
 	public void reset(){	
 		player.reset();
-		//bgMusic.play();
 		blockInput = true;
 		eventCount = 0;
 		eventStart = true;
@@ -341,6 +317,7 @@ public abstract class LevelState extends GameState{
 	public void eventStart() {
 		eventCount++;
 		if(eventCount == 1) {
+			AudioPlayer.loop(levelName, AudioPlayer.BGMUSIC);
 			tb.clear(); // remove all elements in tb [Note] clear() is faster than removeAll()
 			tb.add(new Rectangle(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT / 2));
 			tb.add(new Rectangle(0, 0, GamePanel.WIDTH / 2, GamePanel.HEIGHT));
@@ -358,7 +335,6 @@ public abstract class LevelState extends GameState{
 			eventStart = blockInput = false;
 			subtitle.begin();
 			eventCount = 0;
-			bgMusic.play();
 			tb.clear(); // remove all elements in the ArrayList
 		}
 	}
@@ -369,8 +345,7 @@ public abstract class LevelState extends GameState{
 		if(eventCount == 1) {
 			player.setDead();
 			player.stop();
-			scream.play();
-			bgMusic.close();
+			AudioPlayer.stop(levelName, AudioPlayer.BGMUSIC);
 		}
 		else if(eventCount == 60) {
 			tb.clear();
@@ -393,12 +368,11 @@ public abstract class LevelState extends GameState{
 	// finish game
 	public void eventFinish(int nextState) {
 		
-//		player.stop();
-		
 		// Save player status
 		PlayerSave.setHealth(player.getHealth());
 		PlayerSave.setMoney(player.getMoney());
 		PlayerSave.setWings(player.hasWings());
+		PlayerSave.setShield(player.hasShield());
 		
 		PlayerSave.setX(player.getX());
 		PlayerSave.setY(player.getY());
@@ -406,7 +380,7 @@ public abstract class LevelState extends GameState{
 		
 		PlayerSave.setFlying(player.isUp());
 		
-		bgMusic.close();
+		AudioPlayer.close(levelName, AudioPlayer.BGMUSIC);
 		gsm.setStates(nextState);
 		
 	}

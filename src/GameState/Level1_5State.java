@@ -7,18 +7,21 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
 import Audio.AudioPlayer;
 import Entity.Dialog;
-import Entity.Enemy;
 import Entity.Explosion;
-import Entity.Item;
 import Entity.PlayerSave;
-import Entity.Enemies.Alligator;
-import Entity.Enemies.Slugger;
-import Entity.Enemies.Snake;
-import Entity.Items.Bomb;
-import Entity.Items.Coin;
-import Entity.Items.Treasurebox;
+import Entity.Title;
+import Entity.Object.Enemies.Alligator;
+import Entity.Object.Enemies.Slugger;
+import Entity.Object.Enemies.Snake;
+import Entity.Object.Items.Bomb;
+import Entity.Object.Items.Coin;
+import Entity.Object.Items.Treasurebox;
+import Entity.Object.Enemy;
+import Entity.Object.Item;
 import Main.GamePanel;
 import TileMap.Background;
 
@@ -39,7 +42,9 @@ public class Level1_5State extends LevelState {
 		bg = new Background("/Backgrounds/background_1_5.gif", 0.5);
 		
 		// background music
-		bgMusic = new AudioPlayer("/Music/Level1Music.mp3");
+		levelName = "level5";
+		AudioPlayer.load("/Music/level5Music.mp3", levelName, AudioPlayer.BGMUSIC);
+		AudioPlayer.setVolume();
 		
 		dialogFrame = new Dialog();
 		
@@ -49,6 +54,17 @@ public class Level1_5State extends LevelState {
 		
 		populateEnemies();
 		populateItems();
+		
+		// load subtitle
+		try {
+			subtitleImg = ImageIO.read(
+				getClass().getResourceAsStream("/HUD/level5.png")
+			);
+			subtitle = new Title(subtitleImg);
+			subtitle.setY(85);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 		currentDialog = 0;
 		
@@ -129,6 +145,7 @@ public class Level1_5State extends LevelState {
 		}
 
 		if (player.getY() > (levelTileY + levelTileHeight) * 16) {
+			dialogFrame.setDialog1_5(new String[] {});
 			PlayerSave.setLvl1_5(true);
 			// eventFinish
 			eventFinish(GameStateManager.LEVEL1_6STATE);
@@ -141,7 +158,6 @@ public class Level1_5State extends LevelState {
 		else player.setPosition(200, 2460);	//get wings
 	
 		populateEnemies();
-		
 		super.reset();
 	}
 
@@ -153,6 +169,7 @@ public class Level1_5State extends LevelState {
 		if(!PlayerSave.enteredLvl1_5())
 			story();
 		else {
+			dialogFrame.setDialog1_5(new String[] {});
 			dialogFrame.end();
 		}
 	}
@@ -176,7 +193,7 @@ public class Level1_5State extends LevelState {
 	@Override
 	public void keyPressed(int k) {
 		super.keyPressed(k);
-		if( k == KeyEvent.VK_SPACE) {
+		if( k == KeyEvent.VK_X) {
 			currentDialog++;
 		}
 	}

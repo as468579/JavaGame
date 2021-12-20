@@ -13,8 +13,9 @@ public class GamePanel extends JPanel
 
 	// dimensions 
 	public static final int WIDTH = 320 ;
-	public static final int HEIGHT = 240  ;
-	public static final int SCALE = 3;
+	public static final int HEIGHT = 240 ;
+	public static final int MAXSCALE = 4;
+	private static int SCALE = 3;
 	
 	// game thread
 	private Thread thread;
@@ -35,6 +36,13 @@ public class GamePanel extends JPanel
 			new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
 		setFocusable(true);
 		requestFocus();
+	}
+	
+	public static int  getScale() { return SCALE; }
+	public static void setScale(int s) { 
+		if(s < 1 || s > MAXSCALE) return;
+		SCALE = s;
+
 	}
 	
 	@Override

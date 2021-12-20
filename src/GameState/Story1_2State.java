@@ -12,11 +12,11 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-import Entity.Enemy;
 import Entity.Explosion;
-import Entity.NPC;
-import Entity.Player;
 import Entity.PlayerSave;
+import Entity.Object.Enemy;
+import Entity.Object.NPC;
+import Entity.Object.Player;
 import Main.GamePanel;
 import TileMap.Background;
 import TileMap.TileMap;
@@ -111,7 +111,7 @@ public class Story1_2State extends LevelState{
 		
 		g.setFont(basicFont);
 		g.setColor(basicColor);
-		g.drawString("<SPACE>", GamePanel.WIDTH - 50, GamePanel.HEIGHT-10);
+		g.drawString("<Press X>", GamePanel.WIDTH - 60, GamePanel.HEIGHT-10);
 		
 		g.setFont(storyFont);
 		g.setColor(storyColor);
@@ -146,7 +146,7 @@ public class Story1_2State extends LevelState{
 		if( k == KeyEvent.VK_ENTER) {
 			endStory();
 		}
-		if( k == KeyEvent.VK_SPACE) {
+		if( k == KeyEvent.VK_SPACE || k == KeyEvent.VK_X) {
 			if(!hasAnotherStoryPart(storyPart, storyPart.length))
 				endStory();
 		}

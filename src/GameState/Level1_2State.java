@@ -7,19 +7,22 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
 import Audio.AudioPlayer;
 import Entity.Dialog;
-import Entity.Enemy;
 import Entity.Explosion;
-import Entity.Item;
 import Entity.PlayerSave;
-import Entity.Enemies.Alligator;
-import Entity.Enemies.Bat;
-import Entity.Enemies.Slugger;
-import Entity.Enemies.Snake;
-import Entity.Items.Bomb;
-import Entity.Items.Coin;
-import Entity.Items.Treasurebox;
+import Entity.Title;
+import Entity.Object.Enemies.Alligator;
+import Entity.Object.Enemies.Bat;
+import Entity.Object.Enemies.Slugger;
+import Entity.Object.Enemies.Snake;
+import Entity.Object.Items.Bomb;
+import Entity.Object.Items.Coin;
+import Entity.Object.Items.Treasurebox;
+import Entity.Object.Enemy;
+import Entity.Object.Item;
 import Main.GamePanel;
 import TileMap.Background;
 
@@ -42,8 +45,10 @@ public class Level1_2State extends LevelState {
 		bg = new Background("/Backgrounds/background_1_2.gif", 0.5);
 		
 		// background music
-		bgMusic = new AudioPlayer("/Music/Level1Music.mp3");
-				
+		levelName = "level2";
+		AudioPlayer.load("/Music/level2Music.mp3", levelName, AudioPlayer.BGMUSIC);
+		AudioPlayer.setVolume();
+		
 		dialogFrame = new Dialog();
 
 		enemies = new ArrayList<Enemy>();
@@ -54,6 +59,16 @@ public class Level1_2State extends LevelState {
 		populateItems();
 		if(player.hasWings()) populateEnemies2Wave();
 		
+		// load subtitle
+		try {
+			subtitleImg = ImageIO.read(
+				getClass().getResourceAsStream("/HUD/level2.png")
+			);
+			subtitle = new Title(subtitleImg);
+			subtitle.setY(85);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		currentDialog = 0;
 		
 		shakeSize = 30;
@@ -120,7 +135,7 @@ public class Level1_2State extends LevelState {
 			items.add(tr);
 		}
 	}
-
+	
 	private void populateEnemies2Wave() {
 		Bat b;
 		
@@ -133,8 +148,7 @@ public class Level1_2State extends LevelState {
 		}
 		
 	}
-	
-	
+
 	@Override
 	public void update() {
 		super.update();
@@ -143,6 +157,7 @@ public class Level1_2State extends LevelState {
 
 		if (player.getY() < (levelTileY-1) * 16) {
 			PlayerSave.setLvl1_2(true);
+			tileMap.setShaking(false);
 			// eventFinish
 			if (player.getMoney() >= 20000) { // 達到真結局條件
 				eventFinish(GameStateManager.ENDING_STATE_3);
@@ -153,12 +168,9 @@ public class Level1_2State extends LevelState {
 
 		if (player.getY() > (levelTileY + levelTileHeight) * 16) {
 			PlayerSave.setLvl1_2(true);
-			// eventFinish
-			eventFinish = blockInput = true;
 			
-			if(eventFinish) {
-				eventFinish(GameStateManager.LEVEL1_3STATE);
-			}
+			// eventFinish
+			eventFinish(GameStateManager.LEVEL1_3STATE);
 		}
 	}
 	
@@ -183,9 +195,10 @@ public class Level1_2State extends LevelState {
 			else story1(g);
 		}
 		else {
+			dialogFrame.setDialog1_2(new String[] {});
+			dialogFrame.setDialog1_2_1(new String[] {});
 			dialogFrame.end();
 		}
-		
 	}
 	
 	public void story1(Graphics2D g) {
@@ -220,10 +233,10 @@ public class Level1_2State extends LevelState {
 	@Override
 	public void keyPressed(int k) {
 		super.keyPressed(k);
-		if(player.getX() < 1650 && k == KeyEvent.VK_SPACE ) {
+		if(player.getX() < 1650 && k == KeyEvent.VK_X ) {
 			currentDialog2++;
 		}
-		else if( k == KeyEvent.VK_SPACE) {
+		else if( k == KeyEvent.VK_X) {
 			currentDialog++;
 		}
 		

@@ -6,7 +6,11 @@ import TileMap.TileMap;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Double;
 
+import Entity.Object.FireBall;
+import Entity.Object.Player;
 import Main.GamePanel;
 
 public abstract class MapObject {
@@ -27,11 +31,12 @@ public abstract class MapObject {
 	protected int width;  // for reading in the sprite sheets 
 	protected int height; // for reading in the sprite sheets
 	
-	// 
 	
 	// collision box
+	// cheight and cwidth must be even, or it will embedded in the floors.
 	protected int cwidth; // for detect collision
 	protected int cheight; // for detect collision
+	protected Rectangle2D cBox;
 	
 	// collision
 	protected int currentRow;
@@ -40,6 +45,8 @@ public abstract class MapObject {
 	protected double ydest;
 	protected double xtemp;
 	protected double ytemp;
+	protected double dxtemp;
+	protected double dytemp;
 	protected boolean topLeft;
 	protected boolean topRight;
 	protected boolean bottomLeft;
@@ -59,8 +66,6 @@ public abstract class MapObject {
 	protected boolean jumping;
 	protected boolean falling;
 	protected boolean climbing;
-
-	
 	
 	// movement attributes
  	protected double moveSpeed;
@@ -77,45 +82,76 @@ public abstract class MapObject {
  	protected boolean leftCollided;
  	protected boolean rightCollided;
  	
+ 	// sprite direction
+ 	protected boolean correctSpriteDirection;
+ 	
  	// constructor
  	public MapObject(TileMap tm) {
  		tileMap = tm;
  		tileSize = tm.getTileSize();
+ 		
+		// collision box
+		cBox = getRectangle();
  	}
  	
  	public boolean intersects(MapObject o) {
- 		Rectangle r1 = getRectangle();
- 		Rectangle r2 = o.getRectangle();
- 		return r1.intersects(r2);
+ 		Rectangle2D c2 = o.getCBox();
+ 		return cBox.intersects(c2);
  	}
  	
- 	public boolean intersects(Rectangle r2) {
- 		Rectangle r1 = getRectangle();
- 		return r1.intersects(r2);
+ 	public boolean intersects(Rectangle c2) {
+ 		return cBox.intersects(c2);
  	}
  	
- 	public Rectangle getRectangle() {
+ 	public Rectangle2D getCBox() {
+ 		return cBox;
+ 	}
+ 	
+ 	public Rectangle2D getRectangle() {
  		
- 		return new Rectangle(
- 				(int)(x + xmap - (cwidth / 2)),
- 				(int)(y + ymap - (cheight / 2)),
+ 		return new Rectangle2D.Double(
+ 				(x + xmap - (cwidth / 2)),
+ 				(y + ymap - (cheight / 2)),
  				cwidth,
  				cheight
  		);
  	}
  	
- 	public void calculateEdges(double x, double y) {
+ 	public void calculateEdges(double dx, double dy) {
  		
+ 		/*
  		int leftTile = (int)(x - cwidth / 2) / tileSize;
  		int rightTile = (int)(x + cwidth / 2 - 1) / tileSize;
  		int topTile = (int)(y - cheight / 2) / tileSize;
  		int bottomTile = (int)(y + cheight / 2 - 1) / tileSize;
+ 		
+ 		System.out.println("dx : " + dx + ", dy : " + dy);
+ 		*/
+ 		
+ 		int leftTile = (int)((cBox.getMinX() - xmap + dx)) / tileSize;
+ 		int rightTile = (int)(((cBox.getMaxX() - xmap + dx) - 1))/ tileSize;
+ 		int topTile = (int)((cBox.getMinY() - ymap + dy)) / tileSize;
+ 		int bottomTile = (int)(((cBox.getMaxY() - ymap + dy) - 1)) / tileSize;
+ 		
+ 		// testing 	
+ 		// System.out.println("");
+ 		// System.out.println("dx : " + dx + ", dy : " + dy);
+ 		// System.out.println("x : " + x + ", y : " + y);
+ 		// System.out.println("cBox.x : " + cBox.getMinX());
+ 		// System.out.println("xmap : " + xmap);
+ 		// System.out.println("dx : " + dx);
+ 		// System.out.println(((cBox.getMinX() - xmap + dx) + cwidth - 1) + ", " + ((cBox.getMinY() - ymap + dy) + cheight - 1));
+ 		// System.out.println("leftTile :" + leftTile);
+ 		// System.out.println("rightTile :" + rightTile);
+ 		// System.out.println("topTile :" + topTile);
+ 		// System.out.println("bottomTile :" + bottomTile);
  		
  		// initialize
  		topCollided = false;
  		bottomCollided = false;
  		leftCollided = false;
  		rightCollided = false;
+ 		
  		for(int i = leftTile; i <= rightTile; i++) {
  			
  	 		// check top edge
@@ -140,22 +176,34 @@ public abstract class MapObject {
  			if(tileMap.getType(i, rightTile) == Tile.BLOCKED) {
  				rightCollided = true;
  			}
- 		}		
+ 		}
+ 		
+ 		/*
+ 		System.out.println("Top : " + topCollided);
+ 		System.out.println("Bottom : " + bottomCollided);
+ 		System.out.println("Left : " + leftCollided);
+ 		System.out.println("Right : " + rightCollided);
+ 		if(tileMap.getType(leftTile, bottomTile) == Tile.BLOCKED) {
+ 			
+ 		}
+ 		*/
  	}
  	
+ 	/*
  	public void checkTileMapCollision() {
  		
  		currentCol = (int)x / tileSize;
  		currentRow = (int)y / tileSize;
- 		
+ 	
  		xdest = x + dx;
  		ydest = y + dy;
  		
  		xtemp = x;
  		ytemp = y;
  		
+ 		System.out.println("calculateEdges(x,ydest)");
  		calculateEdges(x,ydest);
- 		
+ 
  		if(dy < 0) {
  			if(topCollided) {
  				dy = 0;
@@ -183,6 +231,7 @@ public abstract class MapObject {
  			}
  		}
  		
+ 		System.out.println("calculateEdges(xdest,y)");
  		calculateEdges(xdest,y);
  		if(dx < 0) {
  			if(leftCollided) {
@@ -204,11 +253,87 @@ public abstract class MapObject {
  		}
  		
  		if(!falling && !climbing) {
+ 			System.out.println("calculateEdges(x, ydest + 1)");
  			calculateEdges(x, ydest + 1);
  			if(!bottomCollided) {
  				falling = true;
  			}
  		}
+ 	}
+ 	*/
+ 	public void checkTileMapCollision() {
+ 		
+ 		currentCol = (int)x / tileSize;
+ 		currentRow = (int)y / tileSize;
+ 	
+ 		xdest = x + dx;
+ 		ydest = y + dy;
+ 		
+ 		dxtemp = dx;
+ 		dytemp = dy;
+ 		
+ 		xtemp = x;
+ 		ytemp = y;
+ 		
+ 		//System.out.println("dx : " + dx + ", dy : " + dy);
+ 		calculateEdges(0, dy);
+ 
+ 		if(dy < 0) {
+ 			if(topCollided) {
+ 				dytemp = 0;
+ 				
+ 				// 即使下一刻就會撞上blocked tile，目前位置仍可能和blocked tile有極小差距 
+ 				// 所以算出合理座標帶入
+ 				ytemp = currentRow * tileSize + cheight / 2;
+ 				
+ 			}
+ 			else {
+ 				ytemp += dy;
+ 			}
+ 			
+ 		}
+ 		if(dy > 0) {
+ 			if(bottomCollided) {
+ 				dytemp = 0;
+ 				falling = false;
+ 				climbing = false;
+ 			    // if cheight /2 > tileSize , the MapObject will bounce 
+ 				ytemp = (currentRow + 1) * tileSize - cheight / 2;
+ 			}
+ 			else {
+ 				ytemp += dy;
+ 			}
+ 		}
+ 		
+ 		calculateEdges(dx, 0);
+ 		if(dx < 0) {
+ 			if(leftCollided) {
+ 				dxtemp = 0;
+ 				xtemp = currentCol * tileSize + cwidth / 2;
+ 			}
+ 			else {
+ 				xtemp += dx;
+ 			}
+ 		}
+ 		if(dx > 0) {
+ 			if(rightCollided) {
+ 				dxtemp = 0;
+ 				xtemp = (currentCol + 1) * tileSize - cwidth / 2;
+ 			}
+ 			else {
+ 				xtemp += dx;
+ 			}
+ 		}
+ 		
+ 		if(!falling && !climbing) {
+ 			calculateEdges(0, dy + 1);
+ 			if(!bottomCollided) {
+ 				falling = true;
+ 			}
+ 		}
+ 		
+ 		dx = dxtemp;
+ 		dy = dytemp;
  	}
  	
  	public int getX() { return (int)x; }
@@ -221,6 +346,7 @@ public abstract class MapObject {
  	public void setPosition(double x, double y) {
  		this.x = x;
  		this.y = y;
+ 		this.cBox = getRectangle();
  	}
  	
  	public void setVector(double dx, double dy) {
@@ -233,48 +359,90 @@ public abstract class MapObject {
  		ymap = tileMap.getY();
  	}
  	
+	public void setFacingRight(boolean b) {
+		facingRight = b;
+	}
+	
  	public void setUp(boolean b) { up = b; }
  	public void setDown(boolean b) { down = b; }
  	public void setLeft(boolean b) { left = b; }
  	public void setRight(boolean b) {  right = b;}
- 	public void setJumping(boolean b) { jumping = b; }
+ 	public void setJumping(boolean b) { 
+ 		jumping = b;
+ 	}
  	
  	public boolean notOnScreen() {
- 		return x + xmap + width < 0 || 
- 			x + xmap - width > GamePanel.WIDTH ||
- 			y + ymap + height < 0 ||
- 			y + ymap - height > GamePanel.HEIGHT;
+ 		return x + xmap + (width / 2) < 0 || 
+ 			x + xmap - (width / 2) > GamePanel.WIDTH ||
+ 			y + ymap + (height / 2) < 0 ||
+ 			y + ymap - (height / 2) > GamePanel.HEIGHT;
  	}
  	
  	public void draw(Graphics2D g) {
-		if(facingRight) {
-			g.drawImage(
-				animation.getImage(),
-				(int)(x + xmap - width / 2),  // let x be the center of image
-				(int)(y + ymap - height / 2), // let y be the center of image
-				null
-			);
-		}
-		else{
-			g.drawImage(
-				animation.getImage(),
-				(int)(x + xmap - width / 2 + width), // let x be the center of image
-				(int)(y + ymap - height /2),         // let y be the center of image
-				-width,
-				height,
-				null
-			);
-			
-		}
+ 		
+		// let MapObject.xmap = tileMap.x and MapObject.ymap = tileMap.y
+		// update the map information saved in MapObject
+		setMapPosition();
+ 		
+		// update collisionBox cuz xmap and ymap is changed
+		updateCollisionBox();
+ 		
+		
+		// if(notOnScreen) return;
+		
+ 		if(correctSpriteDirection) {
+			if(facingRight) {
+				g.drawImage(
+					animation.getImage(),
+					(int)(x + xmap - width / 2),  // let x be the center of image
+					(int)(y + ymap - height / 2), // let y be the center of image
+					null
+				);
+			}
+			else{
+				g.drawImage(
+					animation.getImage(),
+					(int)(x + xmap - width / 2 + width), // let x be the center of image
+					(int)(y + ymap - height /2),         // let y be the center of image
+					-width,
+					height,
+					null
+				);
+				
+			}
+ 		}else {
+			if(facingRight) {
+				g.drawImage(
+						animation.getImage(),
+						(int)(x + xmap - width / 2 + width), // let x be the center of image
+						(int)(y + ymap - height /2),         // let y be the center of image
+						-width,
+						height,
+						null
+					);
+			}
+			else{
+				g.drawImage(
+						animation.getImage(),
+						(int)(x + xmap - width / 2),  // let x be the center of image
+						(int)(y + ymap - height / 2), // let y be the center of image
+						null
+					);
+			}
+ 		}
 		
 		// draw for test
-//		drawCollisionBox(g);
+//		 drawCollisionBox(g);
+ 	}
+ 	
+ 	
+ 	public void updateCollisionBox() {
+ 		cBox = getRectangle();
  	}
  	
 	public void drawCollisionBox(Graphics2D g) {
 		g.setColor(Color.BLUE);
-		Rectangle r = getRectangle();
-		g.draw(r);
+		g.draw(cBox);
 	}
 	
 }

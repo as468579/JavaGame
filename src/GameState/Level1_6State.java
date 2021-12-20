@@ -7,30 +7,38 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
 import Audio.AudioPlayer;
 import Entity.Dialog;
-import Entity.Enemy;
 import Entity.Explosion;
-import Entity.Item;
 import Entity.PlayerSave;
-import Entity.Enemies.Alligator;
-import Entity.Enemies.DarkKnight;
-import Entity.Enemies.IronCannon;
-import Entity.Enemies.Slugger;
-import Entity.Enemies.Snake;
-import Entity.Items.Bomb;
-import Entity.Items.Coin;
-import Entity.Items.Treasurebox;
+import Entity.Title;
+import Entity.Object.Enemies.Alligator;
+import Entity.Object.Enemies.DarkKnight;
+import Entity.Object.Enemies.IronCannon;
+import Entity.Object.Enemies.Slugger;
+import Entity.Object.Enemies.Snake;
+import Entity.Object.Enemies.Thief;
+import Entity.Object.Items.Bomb;
+import Entity.Object.Items.Coin;
+import Entity.Object.Items.Treasurebox;
+import Entity.Object.Items.Wings;
+import Entity.Object.Enemy;
+import Entity.Object.Item;
 import Main.GamePanel;
 import TileMap.Background;
 
 public class Level1_6State extends LevelState {
-	
+
 	private int currentDialog2;
 	private int currentDialog3;
 	
 	private DarkKnight dk;
+	private Thief t;
 	private boolean meetBoss;
+	private boolean bossStoryEnd;
+	private boolean wingsStoryEnd;
 
 	public Level1_6State(GameStateManager gsm) {
 		super(gsm);
@@ -48,8 +56,10 @@ public class Level1_6State extends LevelState {
 		bg = new Background("/Backgrounds/background_1_6.gif", 0.5);
 		
 		// background music
-		bgMusic = new AudioPlayer("/Music/Level1Music.mp3");
-				
+		levelName = "level6";
+		AudioPlayer.load("/Music/level6Music.mp3", levelName, AudioPlayer.BGMUSIC);
+		AudioPlayer.setVolume();
+		
 		dialogFrame = new Dialog();
 		
 		enemies = new ArrayList<Enemy>();
@@ -58,9 +68,30 @@ public class Level1_6State extends LevelState {
 		
 		populateEnemies();
 		populateItems();
-		if(tileMap.isShaking()) populateEnemies2Wave();
-		meetBoss = false;
+		if(player.hasWings()) {
+			populateEnemies2Wave();
+			populateBoss();
+		}
 		
+		
+		// load subtitle
+		try {
+			subtitleImg = ImageIO.read(
+				getClass().getResourceAsStream("/HUD/level6.png")
+			);
+			subtitle = new Title(subtitleImg);
+			subtitle.setY(85);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		if(player.hasWings()) {
+			populateEnemies2Wave();
+			populateRealBoss();
+		}
+		meetBoss = false;
+		bossStoryEnd = false;
+		wingsStoryEnd = false;
 		currentDialog2 = 0;
 		currentDialog3 = 0;
 		
@@ -104,19 +135,20 @@ public class Level1_6State extends LevelState {
 		dk.setPosition(posDarkKnight.x, posDarkKnight.y);
 		
 	}
-	
 
 	private void populateItems() {
 
 		// populate items
 		items.clear();
 
-		Treasurebox tr;
+		Wings w;
 		Bomb b;
 		Coin c;
+		
+		
 		Point[] posCoin = new Point[] { new Point(2545, 2950), };
 		Point[] posBomb = new Point[] {};
-		Point[] posTreasure = new Point[] {new Point(2030, 2815), };
+		Point posWings = new Point(2030, 2770);
 
 		for (int i = 0; i < posCoin.length; i++) {
 			c = new Coin(tileMap);
@@ -128,11 +160,9 @@ public class Level1_6State extends LevelState {
 			b.setPosition(posBomb[i].x, posBomb[i].y);
 			items.add(b);
 		}
-		for (int i = 0; i < posTreasure.length; i++) {
-			tr = new Treasurebox(tileMap);
-			tr.setPosition(posTreasure[i].x, posTreasure[i].y);
-			items.add(tr);
-		}
+		w = new Wings(tileMap);
+		w.setPosition(posWings.x, posWings.y);
+		items.add(w);
 	}
 	
 	private void populateEnemies2Wave() {
@@ -162,34 +192,50 @@ public class Level1_6State extends LevelState {
 		}
 	}
 	
+	private void populateRealBoss() {
+		Point posThief = new Point(1500, 2910);
+		t = new Thief(tileMap);
+		t.setPosition(posThief.x, posThief.y);
+		enemies.add(t);
+	}
 	
-	
+	private void populateBoss() {
+		Point posDarkKnight = new Point(1500, 2910);
+		dk = new DarkKnight(tileMap);
+		dk.setPosition(posDarkKnight.x, posDarkKnight.y);
+		enemies.add(dk);
+	}
 	
 	public void reset() {
-
 		// reset enemies
 		populateEnemies();
-		if(player.hasWings()) populateEnemies2Wave(); // get wings
 		
-		// reset player position
-		if(!player.hasWings()) {
+		if(player.hasWings()) { // get wings
+			populateEnemies2Wave();
+			populateBoss();
+			player.setPosition(2000, 2800);
+		}
+		else { 
 			if(meetBoss) { // meet boss
 				player.setPosition(PlayerSave.getX(), PlayerSave.getY());
-				enemies.add(dk);
+				populateRealBoss();
 			}
 			else 
 				player.setPosition(130, 2700); 
 			
 		}
-		else player.setPosition(2000, 2800);	//get wings
 
 		super.reset();
 	}
 	
 	@Override 
 	public void eventStart() {
-		if(meetBoss && !player.hasWings()) {
-			setFocus(dk);
+		if(meetBoss) {
+			if(player.hasWings()) {
+				setFocus(dk);
+			}else {
+				setFocus(t);
+			}
 		}
 		super.eventStart();
 		if(eventStart == false)
@@ -219,18 +265,18 @@ public class Level1_6State extends LevelState {
 	public void draw(Graphics2D g) {
 		super.draw(g);
 		
-		if(player.getX() > 1160 && !meetBoss) { //Boss appeared!!!
+		// set once
+		if(player.getX() > 1160 && !meetBoss && !tileMap.isShaking()) { //Boss appeared!!!
 			PlayerSave.setX(1040);
 			PlayerSave.setY(2930);
-			
-			setFocus(dk);
+			populateRealBoss();
+			setFocus(t);
 			meetBoss = true;
-			enemies.add(dk);
 		}
 		
 		//run dialog
 		if(!PlayerSave.enteredLvl1_6()) {
-			if(player.getX() > 1160) {
+			if(meetBoss && !bossStoryEnd) { //Boss appeared!!!
 				storyBoss();
 			}
 			else story1();
@@ -238,12 +284,15 @@ public class Level1_6State extends LevelState {
 			//TODO
 			// get wings
 		
-			if(player.getX() > 2000) {
+			if(player.hasWings() && !wingsStoryEnd) {
 				storyEscape();
 				player.setWings(true);
 			}
 		}
 		else {
+			dialogFrame.setDialog1_6(new String[] {});
+			dialogFrame.setDialog1_6_1(new String[] {});
+			dialogFrame.setDialog1_6_2(new String[] {});
 			dialogFrame.end();
 		}
 	}
@@ -273,6 +322,7 @@ public class Level1_6State extends LevelState {
 			dialogFrame.end();
 			dialogFrame.setDialog1_6_1(new String[] {});
 			setFocus(player);
+			bossStoryEnd = true;
 		}
 	}
 	
@@ -289,13 +339,13 @@ public class Level1_6State extends LevelState {
 			player.stop();
 			
 			// start shaking map
-			if(currentDialog3 == 2) tileMap.setShaking(true);
+			if(currentDialog3 >= 2) tileMap.setShaking(true);
 			dialogFrame.setContent(dialog1_6_2[currentDialog3]);
 		}
 		else {
 			dialogFrame.end();
 			dialogFrame.setDialog1_6_2(new String[] {});
-			
+			wingsStoryEnd = true;
 			blockInput = false;
 		}
 	}
@@ -305,15 +355,15 @@ public class Level1_6State extends LevelState {
 	public void keyPressed(int k) {
 		super.keyPressed(k);
 		
-		if(player.getX() > 1160 && k == KeyEvent.VK_SPACE ) {
+		if( k == KeyEvent.VK_X && meetBoss && !bossStoryEnd) {
 			currentDialog2++;
 		}
-		else if( k == KeyEvent.VK_SPACE) {
+		else if( k == KeyEvent.VK_X) {
 			currentDialog++;
 		}
 		//TODO
 		//get wings
-		if(player.getX() > 2000 && k == KeyEvent.VK_SPACE) {
+		if( k == KeyEvent.VK_X && player.hasWings() && !wingsStoryEnd) {
 			currentDialog3++;
 		}
 	}

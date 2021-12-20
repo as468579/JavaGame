@@ -9,12 +9,12 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+import Audio.AudioPlayer;
 import Entity.PlayerSave;
 import Main.GamePanel;
 import TileMap.Background;
 
 public class Ending3State extends LevelState{
-	
 	
 	public Ending3State(GameStateManager gsm){
 		super(gsm);
@@ -26,6 +26,10 @@ public class Ending3State extends LevelState{
 		
 		bg = new Background("/Backgrounds/ending_bg3.gif",0.5);
 		bg.setPosition(0, 0);
+		
+		// background music
+		levelName = "Ending3";
+		AudioPlayer.load("/Music/level1Music.mp3", levelName, AudioPlayer.BGMUSIC);
 		
 		storyColor = new Color(255,100,255);
 		storyFont = new Font(
@@ -49,7 +53,6 @@ public class Ending3State extends LevelState{
 		eventCount = 0;
 		eventStart = true;
 	}
-	
 	
 	@Override
 	public void update() {
@@ -76,7 +79,7 @@ public class Ending3State extends LevelState{
 		}else {
 			g.setColor(basicColor);
 			g.setFont(basicFont);
-			g.drawString("<SPACE>", GamePanel.WIDTH-55, GamePanel.HEIGHT-5);
+			g.drawString("<Press X>", GamePanel.WIDTH-60, GamePanel.HEIGHT-5);
 			
 			g.setColor(storyColor);
 			g.setFont(storyFont);
@@ -100,10 +103,9 @@ public class Ending3State extends LevelState{
 	@Override
 	public void keyPressed(int k) {
 		if( k == KeyEvent.VK_ESCAPE) {
-			PlayerSave.init();
-			gsm.setStates(GameStateManager.MENUSTATE);
+			eventFinish(GameStateManager.MENUSTATE);
 		}
-		if( k == KeyEvent.VK_SPACE) {
+		if( k == KeyEvent.VK_SPACE || k == KeyEvent.VK_X) {
 			currentDialog++;
 		}
 	}
@@ -113,5 +115,11 @@ public class Ending3State extends LevelState{
 		
 	}
 	
+	@Override
+	public void eventFinish(int nextState) {
+		PlayerSave.init();
+		AudioPlayer.close(levelName, AudioPlayer.BGMUSIC);
+		gsm.setStates(nextState);
+	}
 
 }
