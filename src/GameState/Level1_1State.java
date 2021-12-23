@@ -20,6 +20,7 @@ import Entity.Object.Enemies.Bat;
 import Entity.Object.Enemies.DarkKnight;
 import Entity.Object.Enemies.IronCannon;
 import Entity.Object.Enemies.SkullWarrior;
+import Entity.Object.Enemies.SkullWitch;
 import Entity.Object.Enemies.Slugger;
 import Entity.Object.Enemies.Snake;
 import Entity.Object.Enemies.Thief;
@@ -102,7 +103,8 @@ public class Level1_1State extends LevelState {
 		DarkKnight dk;
 		Bat b;
 		Thief t;
-		SkullWarrior sw;
+		SkullWarrior swa;
+		SkullWitch swi;
 		
 		Point[] posSnake = new Point[] {};
 		Point[] posAlligator = new Point[] {};
@@ -115,9 +117,9 @@ public class Level1_1State extends LevelState {
 //		t.setPosition(200,350);
 //		enemies.add(t);
  		
- 		sw = new SkullWarrior(tileMap);
- 		sw.setPosition(200, 300);
- 		enemies.add(sw);
+ 		swi = new SkullWitch(tileMap);
+ 		swi.setPosition(200, 300);
+ 		enemies.add(swi);
  		
  		
  		
