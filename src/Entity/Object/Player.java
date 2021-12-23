@@ -665,10 +665,10 @@ public class Player extends MapObject{
  		
  		super.calculateEdges(dx, dy);
  		
- 		int leftTile = (int)((cBox.getMinX() - xmap + dx)) / tileSize;
- 		int rightTile = (int)(((cBox.getMaxX() - xmap + dx) - 1))/ tileSize;
- 		int topTile = (int)((cBox.getMinY() - ymap + dy)) / tileSize;
- 		int bottomTile = (int)(((cBox.getMaxY() - ymap + dy) - 2)) / tileSize;
+ 		int leftTile = (int)((cBox.getMinX() + dx)) / tileSize;
+ 		int rightTile = (int)(((cBox.getMaxX() + dx) - 1))/ tileSize;
+ 		int topTile = (int)((cBox.getMinY() + dy)) / tileSize;
+ 		int bottomTile = (int)(((cBox.getMaxY() + dy) - 2)) / tileSize;
  		
  		for(int i = leftTile; i <= rightTile; i++) {
  			

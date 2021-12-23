@@ -11,6 +11,7 @@ import java.awt.geom.Rectangle2D.Double;
 
 import Entity.Object.FireBall;
 import Entity.Object.Player;
+import Entity.Object.Enemies.SkullWarrior;
 import Main.GamePanel;
 
 public abstract class MapObject {
@@ -108,10 +109,14 @@ public abstract class MapObject {
  	}
  	
  	public Rectangle2D getRectangle() {
- 		
+ 		// Retangle2D:
+ 		//   minX: x
+ 		//   maxX: x + width
+ 		//   minY: y
+ 		//   maxY: y + height
  		return new Rectangle2D.Double(
- 				(x + xmap - (cwidth / 2)),
- 				(y + ymap - (cheight / 2)),
+ 				(x - (cwidth / 2.0)),  // The X coordinate of the upper-left corner of the newly constructed Rectangle2D
+ 				(y - (cheight / 2.0)), // The Y coordinate of the upper-left corner of the newly constructed Rectangle2D
  				cwidth,
  				cheight
  		);
@@ -127,12 +132,22 @@ public abstract class MapObject {
  		
  		System.out.println("dx : " + dx + ", dy : " + dy);
  		*/
+
+ 		// cBox.getMaxX = cBox.x + width;
+ 		int leftTile = (int)((cBox.getMinX() + dx)) / tileSize;
+ 		int rightTile = (int)(((cBox.getMaxX() + dx) - 1))/ tileSize;
+ 		int topTile = (int)((cBox.getMinY()  + dy)) / tileSize;
+ 		double a = (cBox.getMinX());
+ 		double c = (cBox.getMinY());
+ 		double d = (cBox.getMaxX());
+ 		double e = (cBox.getMaxY());
+ 		int b = (int)(((cBox.getMaxY() + dy) - 1));
+ 		int bottomTile = (int)(((cBox.getMaxY() + dy) - 1)) / tileSize;
  		
- 		int leftTile = (int)((cBox.getMinX() - xmap + dx)) / tileSize;
- 		int rightTile = (int)(((cBox.getMaxX() - xmap + dx) - 1))/ tileSize;
- 		int topTile = (int)((cBox.getMinY() - ymap + dy)) / tileSize;
- 		int bottomTile = (int)(((cBox.getMaxY() - ymap + dy) - 1)) / tileSize;
- 		
+ 		if(this instanceof SkullWarrior) {
+ 			System.out.println("x: " + x + ", y: " + y + ", dx: " + dx + ", dy: " + dy + ", falling: " + falling + ", climbing: " + climbing + ",  bottomTile: " + bottomTile);
+ 		}
+ 	
  		// testing 	
  		// System.out.println("");
  		// System.out.println("dx : " + dx + ", dy : " + dy);
@@ -152,28 +167,38 @@ public abstract class MapObject {
  		leftCollided = false;
  		rightCollided = false;
  		
+ 		
  		for(int i = leftTile; i <= rightTile; i++) {
  			
  	 		// check top edge
  			if (tileMap.getType(topTile, i) == Tile.BLOCKED)  {
+ 				System.out.println(topTile + ", " + i + ": TopCollided");
  				topCollided = true;
  			}
  			
  			// check bottom edge
  			if(tileMap.getType(bottomTile, i) == Tile.BLOCKED) {
+ 				System.out.println(bottomTile + ", " + i + ": BottomCollided");
  				bottomCollided = true;
  			}
  		}
  		
  		for(int i = topTile; i <= bottomTile; i++) {
  			
+ 			if(this instanceof Player) {
+ 				System.out.println(i + ", " + leftTile + ", tileMap.getType(i, leftTile): " + tileMap.getType(i, leftTile));
+ 				System.out.println(i + ", " + rightTile + ", tileMap.getType(i, rightTile): " + tileMap.getType(i, rightTile));
+ 			}
+ 			
  	 		// check left edge
  			if (tileMap.getType(i, leftTile) == Tile.BLOCKED)  {
+ 				System.out.println(i + ", " + leftTile + ": LeftCollided");
  				leftCollided = true;
- 			}
+ 			 }
  			
  			// check right edge
  			if(tileMap.getType(i, rightTile) == Tile.BLOCKED) {
+ 				System.out.println(i + ", " + rightTile + ": RightCollided");
  				rightCollided = true;
  			}
  		}
@@ -262,7 +287,11 @@ public abstract class MapObject {
  	}
  	*/
  	public void checkTileMapCollision() {
- 		
+
+ 		if(this instanceof SkullWarrior) {
+ 	 		System.out.println("checkTileMapCollision");
+ 		}
+
  		currentCol = (int)x / tileSize;
  		currentRow = (int)y / tileSize;
  	
@@ -284,7 +313,7 @@ public abstract class MapObject {
  				
  				// 即使下一刻就會撞上blocked tile，目前位置仍可能和blocked tile有極小差距 
  				// 所以算出合理座標帶入
- 				ytemp = currentRow * tileSize + cheight / 2;
+ 				ytemp = currentRow * tileSize + cheight / 2.0;
  				
  			}
  			else {
@@ -294,22 +323,26 @@ public abstract class MapObject {
  		}
  		if(dy > 0) {
  			if(bottomCollided) {
- 				dytemp = 0;
- 				falling = false;
- 				climbing = false;
- 			    // if cheight /2 > tileSize , the MapObject will bounce 
- 				ytemp = (currentRow + 1) * tileSize - cheight / 2;
+ 					System.out.println("bottomCollided");
+ 	 				System.out.println("y = " + y + ", (currentRow) * tileSize - cheight = " + ((currentRow) * tileSize - cheight));
+ 					dytemp = 0;
+ 	 				falling = false;
+ 	 				climbing = false;
+ 	 			    
+ 	 				currentRow = (int)(((cBox.getMaxY() + dy) - 1)) / tileSize;
+ 	 				ytemp = (currentRow) * tileSize - cheight / 2.0; 	
  			}
  			else {
  				ytemp += dy;
  			}
  		}
- 		
+
  		calculateEdges(dx, 0);
  		if(dx < 0) {
  			if(leftCollided) {
  				dxtemp = 0;
- 				xtemp = currentCol * tileSize + cwidth / 2;
+ 				currentCol = (int)((cBox.getMinX() + dx)) / tileSize;
+ 				xtemp = (currentCol + 1) * tileSize +  cwidth / 2.0;
  			}
  			else {
  				xtemp += dx;
@@ -318,13 +351,16 @@ public abstract class MapObject {
  		if(dx > 0) {
  			if(rightCollided) {
  				dxtemp = 0;
- 				xtemp = (currentCol + 1) * tileSize - cwidth / 2;
+ 				currentCol = (int)((cBox.getMaxX() + dx) - 1) / tileSize;
+ 				xtemp = (currentCol) * tileSize - cwidth / 2.0;
  			}
  			else {
  				xtemp += dx;
  			}
  		}
  		
+ 		
+
  		if(!falling && !climbing) {
  			calculateEdges(0, dy + 1);
  			if(!bottomCollided) {
@@ -392,6 +428,7 @@ public abstract class MapObject {
 		
  		if(correctSpriteDirection) {
 			if(facingRight) {
+				// The image is drawn with its top-left corner at (x, y) in this graphics context's coordinate space
 				g.drawImage(
 					animation.getImage(),
 					(int)(x + xmap - width / 2),  // let x be the center of image
@@ -432,7 +469,7 @@ public abstract class MapObject {
  		}
 		
 		// draw for test
-//		 drawCollisionBox(g);
+		 drawCollisionBox(g);
  	}
  	
  	
@@ -441,8 +478,16 @@ public abstract class MapObject {
  	}
  	
 	public void drawCollisionBox(Graphics2D g) {
+		
+		Rectangle2D r1 = new Rectangle2D.Double(
+ 				(x + xmap - (cwidth / 2.0)),
+ 				(y + ymap - (cheight / 2.0)),
+ 				cwidth,
+ 				cheight
+ 		);
 		g.setColor(Color.BLUE);
-		g.draw(cBox);
+		
+		g.draw(r1);
 	}
 	
 }

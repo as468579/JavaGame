@@ -19,6 +19,7 @@ import Entity.Object.Enemies.Alligator;
 import Entity.Object.Enemies.Bat;
 import Entity.Object.Enemies.DarkKnight;
 import Entity.Object.Enemies.IronCannon;
+import Entity.Object.Enemies.SkullWarrior;
 import Entity.Object.Enemies.Slugger;
 import Entity.Object.Enemies.Snake;
 import Entity.Object.Enemies.Thief;
@@ -101,6 +102,7 @@ public class Level1_1State extends LevelState {
 		DarkKnight dk;
 		Bat b;
 		Thief t;
+		SkullWarrior sw;
 		
 		Point[] posSnake = new Point[] {};
 		Point[] posAlligator = new Point[] {};
@@ -109,29 +111,34 @@ public class Level1_1State extends LevelState {
  		if(tileMap == null) System.exit(0);
  		
  		// test
- 		t = new Thief(tileMap);
-		t.setPosition(200,350);
-		enemies.add(t);
+// 		t = new Thief(tileMap);
+//		t.setPosition(200,350);
+//		enemies.add(t);
+ 		
+ 		sw = new SkullWarrior(tileMap);
+ 		sw.setPosition(200, 300);
+ 		enemies.add(sw);
+ 		
  		
  		
 
 		// setFocus(t);
 		
-		for (int i = 0; i < posSnake.length; i++) {
-			sn = new Snake(tileMap);
-			sn.setPosition(posSnake[i].x, posSnake[i].y);
-			enemies.add(sn);
-		}
-		for (int i = 0; i < posAlligator.length; i++) {
-			a = new Alligator(tileMap);
-			a.setPosition(posAlligator[i].x, posAlligator[i].y);
-			enemies.add(a);
-		}
-		for (int i = 0; i < posSlugger.length; i++) {
-			sl = new Slugger(tileMap);
-			sl.setPosition(posSlugger[i].x, posSlugger[i].y);
-			enemies.add(sl);
-		}
+//		for (int i = 0; i < posSnake.length; i++) {
+//			sn = new Snake(tileMap);
+//			sn.setPosition(posSnake[i].x, posSnake[i].y);
+//			enemies.add(sn);
+//		}
+//		for (int i = 0; i < posAlligator.length; i++) {
+//			a = new Alligator(tileMap);
+//			a.setPosition(posAlligator[i].x, posAlligator[i].y);
+//			enemies.add(a);
+//		}
+//		for (int i = 0; i < posSlugger.length; i++) {
+//			sl = new Slugger(tileMap);
+//			sl.setPosition(posSlugger[i].x, posSlugger[i].y);
+//			enemies.add(sl);
+//		}
 	}
 
 	private void populateItems() {
@@ -156,21 +163,21 @@ public class Level1_1State extends LevelState {
 		Point[] posCoin = new Point[] { new Point(1625, 275), };
 		Point[] posBomb = new Point[] {};
 		Point[] posTreasure = new Point[] {new Point(2450, 35), };
-		for (int i = 0; i < posCoin.length; i++) {
-			c = new Coin(tileMap);
-			c.setPosition(posCoin[i].x, posCoin[i].y);
-			items.add(c);
-		}
-		for (int i = 0; i < posBomb.length; i++) {
-			b = new Bomb(tileMap);
-			b.setPosition(posBomb[i].x, posBomb[i].y);
-			items.add(b);
-		}
-		for (int i = 0; i < posTreasure.length; i++) {
-			tr = new Treasurebox(tileMap);
-			tr.setPosition(posTreasure[i].x, posTreasure[i].y);
-			items.add(tr);
-		}
+//		for (int i = 0; i < posCoin.length; i++) {
+//			c = new Coin(tileMap);
+//			c.setPosition(posCoin[i].x, posCoin[i].y);
+//			items.add(c);
+//		}
+//		for (int i = 0; i < posBomb.length; i++) {
+//			b = new Bomb(tileMap);
+//			b.setPosition(posBomb[i].x, posBomb[i].y);
+//			items.add(b);
+//		}
+//		for (int i = 0; i < posTreasure.length; i++) {
+//			tr = new Treasurebox(tileMap);
+//			tr.setPosition(posTreasure[i].x, posTreasure[i].y);
+//			items.add(tr);
+//		}
 		
 	}
 

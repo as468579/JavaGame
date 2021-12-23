@@ -14,6 +14,7 @@ public class LoadState extends GameState{
 	public static BufferedImage[][] Bullet = load("/Sprites/Enemies/bullet.png", 20, 8);
 	public static BufferedImage[][] Tornado = load("/Sprites/Enemies/tornado.png", 40 ,40);
 	public static BufferedImage[][] Alligator = load("/Sprites/Enemies/alligator.png", 48, 48);
+	public static BufferedImage[][] SkullWarrior = load("/Sprites/Enemies/skullWarrior.png", 100, 100);
 	public static BufferedImage[][] Slugger = load("/Sprites/Enemies/slugger.gif", 60, 60);
 	public static BufferedImage[][] Snake = load("/Sprites/Enemies/snake.png", 30, 30);
 	public static BufferedImage[][] Bat = load("/Sprites/Enemies/bat.png", 50, 30);
