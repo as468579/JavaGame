@@ -15,13 +15,19 @@ public class MenuState extends GameState{
 	private int currentChoice = 0;
 	private String[] options = {
 		"Start",
+		"Store", 
 		"Setting",
 		"Quit"
 	};
-	private Color titleColor;
-	private Font titleFont;
+	private Color  titleColor;
+	private Font   titleFont;
+	private int titleX;
+	private int titleY;
 	
-	private Font normalFont;
+	private Font optionFont;
+	private int  optionX;
+	private int  optionY;
+	private int  optionInterval;
 	
 	public MenuState(GameStateManager gsm){
 		this.gsm = gsm;
@@ -29,20 +35,25 @@ public class MenuState extends GameState{
 		
 		try {
 
-			bg = new Background("/Backgrounds/morning.jpg",1);
-			bg.setVector(-0.1, 0);
+			bg = new Background("/Backgrounds/morning.jpg", 1);
+			bg.setVector(-0.5, 0);
 			bg.setPosition(0, 0);
 			
 			titleColor = new Color(128,0,0);
-			titleFont = new Font(
+			titleFont  = new Font(
 					"Century Gothic",
 					Font.BOLD,
-					28);
+					70);
+			titleX     = 80;
+			titleY     = 250;
 			
-			normalFont = new Font(
+			optionFont = new Font(
 					"Arial",
 					Font.BOLD,
-					16);
+					50);
+			optionX        = 600;
+			optionY        = 450;
+			optionInterval = 80;
 			
 		}
 		catch(Exception e) {
@@ -70,14 +81,13 @@ public class MenuState extends GameState{
 		// draw bg
 		bg.draw(g);
 		
-		// draw ttile
+		// draw title
 		g.setColor(titleColor);
 		g.setFont(titleFont);
-		g.drawString("Java Game", 80, 70);
+		g.drawString("Zong Wen's Facinated Adventure", titleX, titleY);
 		
 		// draw menu options
-		g.setFont(normalFont);
-		
+		g.setFont(optionFont);
 		for(int i = 0; i < options.length; i++){
 			if(i == currentChoice){
 				g.setColor(Color.RED);
@@ -85,7 +95,7 @@ public class MenuState extends GameState{
 			else{
 				g.setColor(Color.BLACK);
 			}
-			g.drawString(options[i], 130, 140 + i * 20);
+			g.drawString(options[i], optionX - (options[i].length()/2 * 23), optionY + i * optionInterval);
 		}
 	}
 	
