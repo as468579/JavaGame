@@ -9,6 +9,8 @@ import TileMap.Background;
 
 public class MenuState extends GameState{
 	
+	private enum MenuOption{ Start, Store, Setting, Quit };
+	
 	private Background bg;
 	private AudioPlayer bgMusic;
 	
@@ -88,19 +90,24 @@ public class MenuState extends GameState{
 		
 		// draw menu options
 		g.setFont(optionFont);
-		for(int i = 0; i < options.length; i++){
-			if(i == currentChoice){
-				g.setColor(Color.RED);
-			}
-			else{
-				g.setColor(Color.BLACK);
-			}
-			g.drawString(options[i], optionX - (options[i].length()/2 * 23), optionY + i * optionInterval);
+		
+		int index = 0;
+		for(MenuOption option: MenuOption.values()) {
+			
+			String option_s = option.toString();
+			if(index == currentChoice) { g.setColor(Color.RED); }
+			else                       { g.setColor(Color.BLACK); }
+			g.drawString(
+							option_s,
+							optionX - (option_s.length()/2 * 23),
+							optionY + index * optionInterval
+			);
+			index += 1;
 		}
 	}
 	
 	private void select(){
-		if(currentChoice == 0){
+		if(currentChoice == MenuOption.Start.ordinal()){
 			
 			if(PlayerSave.getCurrentRole() == PlayerSave.DRAGON) { //dragon type
 				gsm.setStates(GameStateManager.STORY1_1_2STATE);
@@ -109,10 +116,10 @@ public class MenuState extends GameState{
 				gsm.setStates(GameStateManager.STORY1_1_1STATE);
 			}
 		}
-		else if(currentChoice == 1){
+		else if(currentChoice == MenuOption.Setting.ordinal()){
 			gsm.setStates(GameStateManager.SETTINGSTATE);
 		}
-		else if(currentChoice == 2){
+		else if(currentChoice == MenuOption.Quit.ordinal()){
 			System.exit(0);
 		}
 	}
@@ -132,12 +139,12 @@ public class MenuState extends GameState{
 			currentChoice--;
 			if(currentChoice == -1)
 			{
-				currentChoice = options.length - 1;
+				currentChoice = MenuOption.values().length - 1;
 			}
 		}
 		else if(k == KeyEvent.VK_DOWN){
 			currentChoice++;
-			if(currentChoice == options.length)
+			if(currentChoice == MenuOption.values().length)
 			{
 				currentChoice = 0;
 			}
