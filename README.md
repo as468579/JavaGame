@@ -1,5 +1,9 @@
 # Come and Start Your Fascinated  Adventure!
 
+## Last Updates (2021/12/23):
+1. Change the collision mechanism of MapObject
+2. Add 5 Skull Monsters (SkullWitch, SkullDragonKnight, SkullHonRider, SkullWarrior, SkullYeti)
+
 ## Menu
 ![Menu](https://github.com/as468579/JavaGame/blob/master/menu.gif)
 
