@@ -22,8 +22,8 @@ public class Story1_1_1State extends LevelState {
 		bg = new Background("/Backgrounds/story_bg.gif", 0.5);
 		
 		storyPart = new boolean[] {true, false, false, false};
-		basicFont = new Font("Microsoft JhengHei", Font.PLAIN, 11);
-		storyFont = new Font("Microsoft JhengHei", Font.PLAIN, 16);
+		basicFont = new Font("Microsoft JhengHei", Font.PLAIN, 30);
+		storyFont = new Font("Microsoft JhengHei", Font.PLAIN, 30);
 		
 		basicColor = new Color(100, 100, 100);
 		storyColor = new Color(0, 0, 0);

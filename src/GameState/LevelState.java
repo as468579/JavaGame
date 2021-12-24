@@ -325,10 +325,10 @@ public abstract class LevelState extends GameState{
 			tb.add(new Rectangle(GamePanel.WIDTH / 2, 0, GamePanel.WIDTH / 2, GamePanel.HEIGHT));
 		}
 		if(eventCount > 1 && eventCount < 60) {
-			tb.get(0).height -= 4;
-			tb.get(1).width -= 6;
-			tb.get(2).y += 4;
-			tb.get(3).x += 6;
+			tb.get(0).height -= 16;
+			tb.get(1).width -= 24;
+			tb.get(2).y += 16;
+			tb.get(3).x += 24;
 		}
 		if(eventCount == 30) { title.begin(); }
 		if(eventCount == 60) {
